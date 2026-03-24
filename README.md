@@ -28,7 +28,7 @@ export SK_API_URL=http://localhost:8082
 python -m ridelogger_mcp
 ```
 
-- Health: `GET http://localhost:8083/health`
+- Health: `GET http://localhost:8083/health` → JSON includes `ok`, `service`, and **`version`** (package version).
 - MCP (streamable HTTP): `http://localhost:8083/mcp` (see FastMCP client docs)
 
 ## Docker (unified stack)
@@ -43,29 +43,128 @@ make mcp-logs
 
 Service `sk-mcp` uses `SK_API_URL=http://sk-api:8082` and maps port **8083**.
 
-## Resources (cached reference data)
+---
 
-URIs `ridelogger://reference/{name}` for: `countries`, `currencies`, `vehicle_types`, `vehicle_makes`, `fuel_types`, `fuel_units`, `service_types`, `expense_types`, `mileage_units`.
+## MCP server instructions (host prompt)
 
-Each payload is JSON: `data`, `fetched_at`, `ttl_seconds`, `source_endpoint`.
+The FastMCP app sets **`instructions`** on the server (what MCP clients expose as guidance for the model). Current text (see `src/ridelogger_mcp/app.py`):
 
-Manual refresh: tool `reference_data_refresh` (no token).
+```
+Thin MCP wrapper over RideLogger (Servisna knjižica) REST API. Authenticate with auth_login (email/password) and pass access_token to tools, or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. Call auth_me to read user settings including preferred currency_id. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Use body_json parameters as JSON object strings matching the API request bodies.
+```
 
-## Tools (catalog)
+---
 
-| Tool | Token |
-|------|-------|
-| `auth_login` | no |
-| `auth_me` | yes |
-| `reference_data_refresh` | no |
-| `vehicles_list`, `vehicles_create`, `vehicles_get`, `vehicles_update` | yes |
-| `vehicle_plates_*` (list/create/update/delete) | yes |
-| `vehicle_images_*` (list/get/create/delete) | yes |
-| `fuel_logs_*`, `service_logs_*`, `expense_logs_*` (list/create/get/update/delete) | yes |
-| `generic_vehicle_logs_list`, `generic_vehicle_logs_delete` | yes |
-| `vehicle_log_files_*` (list/upload/upload_base64/delete/download) | yes |
+## MCP prompts
 
-Create/update tools expect **`body_json`** as a JSON **object string** matching the Laravel API request bodies (see `http://localhost:8082/docs` when `sk-api` is running).
+**None.** This project does not register FastMCP `prompt` handlers. `ListPrompts` from clients will not return custom prompts; only the server **`instructions`** above apply.
+
+---
+
+## MCP resources (cached reference data)
+
+Each resource is **`application/json`**. URI pattern: **`ridelogger://reference/{name}`**.
+
+Payload envelope: `data`, `fetched_at`, `ttl_seconds`, `source_endpoint`.
+
+| URI | Dataset |
+|-----|---------|
+| `ridelogger://reference/countries` | Countries |
+| `ridelogger://reference/currencies` | Currencies (codes, rates — use with multi-currency logs) |
+| `ridelogger://reference/vehicle_types` | Vehicle types |
+| `ridelogger://reference/vehicle_makes` | Vehicle makes |
+| `ridelogger://reference/fuel_types` | Fuel types |
+| `ridelogger://reference/fuel_units` | Fuel units |
+| `ridelogger://reference/service_types` | Service types |
+| `ridelogger://reference/expense_types` | Expense types |
+| `ridelogger://reference/mileage_units` | Mileage units |
+
+Manual refresh (no token): tool **`reference_data_refresh`**.
+
+---
+
+## MCP tools (full catalog)
+
+**Auth:** `access_token` = optional if the HTTP client sends `Authorization: Bearer <JWT>` (middleware validates via `/api/auth/me`).
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `auth_login` | no | POST `/api/auth/login` — email, password; returns `access_token` / refresh. |
+| `auth_me` | yes | GET `/api/auth/me` — profile and `currency_id` (display currency). |
+| `reference_data_refresh` | no | Reload all cached reference datasets from the API. |
+
+**Vehicles**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `vehicles_list` | yes | GET `/api/vehicles` (optional `page`). |
+| `vehicles_create` | yes | POST `/api/vehicles` — `body_json`. |
+| `vehicles_get` | yes | GET `/api/vehicles/{id}`. |
+| `vehicles_update` | yes | PUT `/api/vehicles/{id}` — `body_json`. |
+
+**Plate history**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `vehicle_plates_list` | yes | List plates for a vehicle. |
+| `vehicle_plates_create` | yes | Create plate — `body_json`. |
+| `vehicle_plates_update` | yes | Update plate — `body_json`. |
+| `vehicle_plates_delete` | yes | Delete plate. |
+
+**Vehicle images**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `vehicle_images_list` | yes | List images for a vehicle. |
+| `vehicle_images_get` | yes | Get image bytes/metadata. |
+| `vehicle_images_create` | yes | Upload image — `body_json` / multipart per API. |
+| `vehicle_images_delete` | yes | Delete image. |
+
+**Fuel logs** (multi-currency — see tool description for `currency_id` / aggregation)
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `fuel_logs_list` | yes | GET `.../vehicles/{id}/fuel_logs`. |
+| `fuel_logs_create` | yes | POST — `body_json`. |
+| `fuel_logs_get` | yes | GET one log. |
+| `fuel_logs_update` | yes | PUT — `body_json`. |
+| `fuel_logs_delete` | yes | DELETE. |
+
+**Service logs** (multi-currency)
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `service_logs_list` | yes | GET `.../vehicles/{id}/service_logs`. |
+| `service_logs_create` | yes | POST — `body_json`. |
+| `service_logs_get` | yes | GET one log. |
+| `service_logs_update` | yes | PUT — `body_json`. |
+| `service_logs_delete` | yes | DELETE. |
+
+**Expense logs** (multi-currency)
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `expense_logs_list` | yes | GET `.../vehicles/{id}/expense_logs`. |
+| `expense_logs_create` | yes | POST — `body_json`. |
+| `expense_logs_get` | yes | GET one log. |
+| `expense_logs_update` | yes | PUT — `body_json`. |
+| `expense_logs_delete` | yes | DELETE. |
+
+**Generic vehicle logs & attachments**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `generic_vehicle_logs_list` | yes | GET `.../vehicles/{id}/vehicle_logs` (aggregated fuel/service/expense). |
+| `generic_vehicle_logs_delete` | yes | DELETE a generic vehicle log row. |
+| `vehicle_log_files_list` | yes | List files on a vehicle log. |
+| `vehicle_log_files_upload` | yes | Multipart upload (file path or base64). |
+| `vehicle_log_files_upload_base64` | yes | Upload via base64 payload. |
+| `vehicle_log_files_delete` | yes | Delete attachment. |
+| `vehicle_log_files_download` | yes | Download attachment bytes. |
+
+Create/update tools that take **`body_json`** expect a JSON **object string** matching the Laravel API bodies (see Scribe docs when `sk-api` is running).
+
+---
 
 ## Smoke tests
 
@@ -78,6 +177,6 @@ Create/update tools expect **`body_json`** as a JSON **object string** matching 
 
 ## Design notes
 
-- Only `auth_login` omits `access_token`; all other tools require a non-empty token and fail fast if missing.
+- Only `auth_login` and `reference_data_refresh` omit `access_token`; other tools require a non-empty token and fail fast if missing (unless Bearer is set on the HTTP request).
 - Tokens are never logged.
 - Upstream errors are mapped to structured `UpstreamApiError` messages (401/403/404/422/429/5xx hints).
