@@ -16,6 +16,8 @@ def register(mcp: FastMCP) -> None:
         name="reference_data_refresh",
         description=(
             "Reload all cached reference datasets from the API (countries, currencies, etc.). "
+            "The `currencies` dataset is needed to convert monetary log rows (each has `currency_id`) to a single "
+            "display currency — typically the user's `currency_id` from `auth_me`. "
             "Does not require access_token. Use after TTL or when data seems stale."
         ),
     )

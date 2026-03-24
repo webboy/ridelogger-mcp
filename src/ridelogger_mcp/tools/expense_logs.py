@@ -7,7 +7,12 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
-from ridelogger_mcp.tools.common import parse_json_object, require_token, tool_error
+from ridelogger_mcp.tools.common import (
+    MONEY_LOGS_HINT,
+    parse_json_object,
+    require_token,
+    tool_error,
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -15,7 +20,8 @@ def register(mcp: FastMCP) -> None:
         name="expense_logs_list",
         description=(
             "List expense logs for a vehicle (GET /api/vehicles/{vehicle_id}/expense_logs). "
-            "Requires access_token or HTTP Bearer. Optional page."
+            "Requires access_token or HTTP Bearer. Optional page. "
+            + MONEY_LOGS_HINT
         ),
     )
     async def expense_logs_list(
@@ -41,7 +47,9 @@ def register(mcp: FastMCP) -> None:
         name="expense_logs_create",
         description=(
             "Create expense log (POST .../expense_logs). Requires access_token or HTTP Bearer. "
-            "body_json: amount, currency_id, mileage, expense_type_id, title, date; optional description, uuid."
+            "body_json: amount, currency_id, mileage, expense_type_id, title, date; optional description, uuid. "
+            "Monetary fields are stored in the currency given by `currency_id`. "
+            "When comparing totals across logs, use `auth_me` + reference currencies — see expense_logs_list hint."
         ),
     )
     async def expense_logs_create(
@@ -66,7 +74,8 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_get",
         description=(
-            "Get one expense log (GET .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer."
+            "Get one expense log (GET .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
+            + MONEY_LOGS_HINT
         ),
     )
     async def expense_logs_get(
@@ -90,7 +99,8 @@ def register(mcp: FastMCP) -> None:
         name="expense_logs_update",
         description=(
             "Update expense log (PUT .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
-            "body_json: fields per API."
+            "body_json: fields per API (including `currency_id` when changing currency). "
+            "Amounts are interpreted in the row's currency — see expense_logs_list for multi-currency aggregation."
         ),
     )
     async def expense_logs_update(

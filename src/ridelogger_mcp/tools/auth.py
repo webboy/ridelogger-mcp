@@ -18,6 +18,8 @@ def register(mcp: FastMCP) -> None:
             "Authenticate with email and password against RideLogger API. "
             "Does NOT require access_token. "
             "Returns JSON with access_token, refresh_token, expires_in — use access_token for all other tools. "
+            "After login, call `auth_me` to read user settings (including preferred `currency_id` for interpreting "
+            "multi-currency expense/fuel/service logs). "
             "On failure: 422 invalid credentials, 400 validation errors."
         ),
     )
@@ -44,9 +46,13 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="auth_me",
         description=(
-            "Get the current authenticated user profile (GET /api/auth/me). "
-            "Requires access_token or HTTP Authorization: Bearer (validated via /auth/me). "
-            "Returns user object. Errors: 401 if token missing/expired."
+            "Current user profile and account settings (GET /api/auth/me). "
+            "Requires access_token or HTTP Authorization: Bearer. "
+            "Response includes `currency_id` — the user's preferred display/reporting currency — plus country, "
+            "fuel consumption unit, name, email, etc. Use this together with monetary log tools: each log row can be "
+            "in a different currency, so read `currency_id` from `auth_me`, fetch `ridelogger://reference/currencies`, "
+            "convert row amounts to one currency, then aggregate. "
+            "Errors: 401 if token missing/expired."
         ),
     )
     async def auth_me(access_token: str | None = None) -> dict[str, Any]:

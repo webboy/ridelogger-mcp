@@ -1,0 +1,29 @@
+---
+description: Bump patch version on every code change (pyproject + __version__)
+globs: "**/*"
+alwaysApply: true
+---
+
+# Version Bump Rule (ridelogger-mcp)
+
+## On Every Code Change
+
+When you modify any **source code** in ridelogger-mcp, **increment the patch version** in **both** places (mora da ostane usklađeno):
+
+1. `pyproject.toml` → `[project]` → `version = "x.y.z"`
+2. `src/ridelogger_mcp/__init__.py` → `__version__ = "x.y.z"`
+
+Primer: `0.1.1` → `0.1.2` → `0.1.3` …
+
+## Exceptions
+
+Do NOT bump version for:
+
+- Documentation-only changes (README, comments)
+- Config that does not affect runtime behavior
+- Whitespace/formatting fixes
+- Changes only under `.cursor/` pravila koja ne prate izmene u `src/` (ako menjaš samo AI pravila bez koda — bez bump-a)
+
+## Git Tag on Commit
+
+Ako u repou postoji post-commit hook koji taguje `v{version}` (kao u drugim projektima), commituj izmene verzije **zajedno** sa izmenama koda da tag odgovara verziji.

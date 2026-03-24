@@ -6,6 +6,14 @@ import json
 from typing import Any
 
 from ridelogger_mcp.bearer_auth import get_http_bearer_token
+
+# Appended to tool descriptions for endpoints that return monetary log rows (fuel, service, expense, …).
+MONEY_LOGS_HINT = (
+    "Money: logs are multi-currency — each row has its own `currency_id`, and `amount` / `total` are in that row's currency. "
+    "Do not sum raw numbers across rows without converting. Call `auth_me` for the user's preferred `currency_id` "
+    "(account settings), use MCP resource `ridelogger://reference/currencies` (or GET /api/currencies) for codes and "
+    "exchange `value` fields, then normalize every row to one target currency before aggregating or comparing totals."
+)
 from ridelogger_mcp.errors import UpstreamApiError
 from ridelogger_mcp.logging_setup import new_request_id
 

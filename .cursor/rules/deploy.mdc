@@ -1,0 +1,52 @@
+---
+description: Produkcioni deploy i ažuriranje ridelogger-mcp na serveru
+globs: "**/*"
+alwaysApply: true
+---
+
+# Deploy (ridelogger-mcp)
+
+## Remote server
+
+- **Host**: 159.89.22.200
+- **App path**: `/var/www/ridelogger-mcp` (git checkout, venv, `.env`)
+- **systemd**: `ridelogger-mcp.service` — pokreće `python -m ridelogger_mcp` kao `www-data`, sluša **`127.0.0.1:8083`**
+- **Apache**: reverse proxy za `mcp.servisna-knjizica.com` → `http://127.0.0.1:8083/` (TLS preko Certbot-a; HTTP → HTTPS redirect)
+- **Javni URL**: `https://mcp.servisna-knjizica.com` — health `GET /health`, MCP streamable HTTP npr. **`https://mcp.servisna-knjizica.com/mcp`**
+
+Port **8083** nije izložen javno; samo loopback + Apache.
+
+## Konfiguracija na serveru
+
+- **`/var/www/ridelogger-mcp/.env`** (ne commitovati): npr. `SK_API_URL=https://api.servisna-knjizica.com`, `MCP_HOST=127.0.0.1`, `MCP_PORT=8083`
+- Isti fajl koristi **systemd** (`EnvironmentFile=-/var/www/ridelogger-mcp/.env`)
+
+## Ažuriranje posle izmene koda (tipičan deploy)
+
+SSH, pa u app direktorijumu pull, reinstall ako se promenile zavisnosti, restart servisa:
+
+```bash
+ssh -i ~/.ssh/id_openclaw -o StrictHostKeyChecking=no root@159.89.22.200
+cd /var/www/ridelogger-mcp
+sudo -u www-data git pull
+sudo -u www-data .venv/bin/pip install .
+systemctl restart ridelogger-mcp
+```
+
+Provera:
+
+```bash
+curl -fsS https://mcp.servisna-knjizica.com/health
+journalctl -u ridelogger-mcp -n 50 --no-pager
+```
+
+## Apache / TLS
+
+- Vhost fajlovi: npr. `/etc/apache2/sites-available/mcp.servisna-knjizica.com.conf` (HTTP) i `mcp.servisna-knjizica.com-le-ssl.conf` (HTTPS, Certbot).
+- Posle ručne izmene Apache konfiguracije: `apache2ctl configtest && systemctl reload apache2`.
+- Sertifikat: obnavlja **certbot** (`certbot renew` / systemd timer); nije potrebno ručno osim debug-a.
+
+## Napomene
+
+- Ako se doda Python paket u `pyproject.toml`, uvek **`pip install .`** posle pull-a pre restart-a.
+- Za debug logove MCP protokola (više šuma): u `.env` privremeno `MCP_VERBOSE_LOGS=true`, pa `systemctl restart ridelogger-mcp`.

@@ -59,6 +59,9 @@ mcp = FastMCP(
         "Thin MCP wrapper over RideLogger (Servisna knjižica) REST API. "
         "Authenticate with auth_login (email/password) and pass access_token to tools, "
         "or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. "
+        "Call auth_me to read user settings including preferred currency_id. "
+        "Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies "
+        "to convert amounts to one currency before summing — see tool descriptions on those endpoints. "
         "Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. "
         "Use body_json parameters as JSON object strings matching the API request bodies."
     ),
