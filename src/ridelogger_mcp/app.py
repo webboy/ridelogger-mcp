@@ -10,6 +10,7 @@ from fastmcp.server.lifespan import lifespan
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from ridelogger_mcp import __version__
 from ridelogger_mcp.api_client import ApiClient
 from ridelogger_mcp.bearer_auth import RideLoggerBearerMiddleware
 from ridelogger_mcp.config import Settings
@@ -76,7 +77,7 @@ register_resources(mcp)
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(_request: Request) -> JSONResponse:
     return JSONResponse(
-        {"ok": True, "service": "ridelogger-mcp"},
+        {"ok": True, "service": "ridelogger-mcp", "version": __version__},
     )
 
 
