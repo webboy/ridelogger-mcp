@@ -24,6 +24,6 @@ Do NOT bump version for:
 - Whitespace/formatting fixes
 - Changes only under `.cursor/` pravila koja ne prate izmene u `src/` (ako menjaš samo AI pravila bez koda — bez bump-a)
 
-## Git Tag on Commit
+## Git tag (nakon smislenog release-a)
 
-Ako u repou postoji post-commit hook koji taguje `v{version}` (kao u drugim projektima), commituj izmene verzije **zajedno** sa izmenama koda da tag odgovara verziji.
+Tag **`v{version}`** uskladi sa `pyproject.toml` — Cursor agent ili ručno; post-commit hook je **opciono**, ne deo obaveznog workflow-a.
