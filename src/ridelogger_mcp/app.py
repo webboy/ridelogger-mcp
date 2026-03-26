@@ -57,7 +57,7 @@ mcp = FastMCP(
     "RideLogger MCP",
     lifespan=lifespan_fn,
     instructions=(
-        "Thin MCP wrapper over RideLogger (Servisna knjižica) REST API. "
+        "Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). "
         "Authenticate with auth_login (email/password) and pass access_token to tools, "
         "or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. "
         "Call auth_me to read user settings including preferred currency_id. "

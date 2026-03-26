@@ -50,7 +50,7 @@ Service `sk-mcp` uses `SK_API_URL=http://sk-api:8082` and maps port **8083**.
 The FastMCP app sets **`instructions`** on the server (what MCP clients expose as guidance for the model). Current text (see `src/ridelogger_mcp/app.py`):
 
 ```
-Thin MCP wrapper over RideLogger (Servisna knjižica) REST API. Authenticate with auth_login (email/password) and pass access_token to tools, or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. Call auth_me to read user settings including preferred currency_id. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Use body_json parameters as JSON object strings matching the API request bodies.
+Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). Authenticate with auth_login (email/password) and pass access_token to tools, or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. Call auth_me to read user settings including preferred currency_id. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Use body_json parameters as JSON object strings matching the API request bodies.
 ```
 
 ---
