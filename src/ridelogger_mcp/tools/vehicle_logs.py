@@ -94,37 +94,50 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload",
         description=(
-            "Upload attachment via multipart (POST .../put_files). Field name must be vehicle_log_file. "
-            "Requires access_token or HTTP Bearer. Provide file_name + file_base64 OR file_path."
+            "Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
+            "Requires access_token or HTTP Bearer. Exactly one of: chat_upload_id (AI chat attachment UUID), "
+            "or file_base64 + file_name, or file_path."
         ),
     )
     async def vehicle_log_files_upload(
         vehicle_id: int,
         vehicle_log_id: int,
-        file_name: str,
+        file_name: str | None = None,
         file_base64: str | None = None,
         file_path: str | None = None,
+        chat_upload_id: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
             st = get_state()
-            if file_path:
-                with open(file_path, "rb") as f:
-                    raw = f.read()
-            elif file_base64:
-                raw = base64.b64decode(file_base64)
+            if chat_upload_id and (file_path or file_base64 or file_name):
+                raise ValueError("Use either chat_upload_id or file fields, not both.")
+            if chat_upload_id:
+                resp = await st.client.request(
+                    "POST",
+                    f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files",
+                    token=token,
+                    data={"chat_upload_id": chat_upload_id.strip()},
+                )
             else:
-                raise ValueError("Provide file_base64 or file_path.")
-            files = {
-                "vehicle_log_file": (file_name, io.BytesIO(raw), "application/octet-stream"),
-            }
-            resp = await st.client.request(
-                "POST",
-                f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files",
-                token=token,
-                files=files,
-            )
+                if file_path:
+                    with open(file_path, "rb") as f:
+                        raw = f.read()
+                elif file_base64 and file_name:
+                    raw = base64.b64decode(file_base64)
+                else:
+                    raise ValueError("Provide chat_upload_id, or file_base64+file_name, or file_path.")
+                fname = file_name or "upload.bin"
+                files = {
+                    "vehicle_log_file": (fname, io.BytesIO(raw), "application/octet-stream"),
+                }
+                resp = await st.client.request(
+                    "POST",
+                    f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files",
+                    token=token,
+                    files=files,
+                )
             raise_for_status(resp)
             data = resp.json() if resp.content else None
             return {"ok": True, "data": data}
@@ -135,8 +148,8 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_log_files_upload_base64",
         description=(
             "Upload attachment via JSON body (POST .../put_files_cordova). "
-            "Requires access_token or HTTP Bearer. body_json must include vehicle_log_file (base64 string) and "
-            "vehicle_log_file_name."
+            "Requires access_token or HTTP Bearer. body_json: either chat_upload_id (UUID), "
+            "or vehicle_log_file (base64) + vehicle_log_file_name — mutually exclusive."
         ),
     )
     async def vehicle_log_files_upload_base64(
@@ -149,6 +162,9 @@ def register(mcp: FastMCP) -> None:
             token = require_token(access_token)
             body = parse_json_object("body_json", body_json)
             st = get_state()
+            cid = body.get("chat_upload_id")
+            if cid and (body.get("vehicle_log_file") or body.get("vehicle_log_file_name")):
+                raise ValueError("Use either chat_upload_id or base64 fields in body_json, not both.")
             data = await st.client.request_json(
                 "POST",
                 f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files_cordova",

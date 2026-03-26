@@ -83,6 +83,20 @@ Manual refresh (no token): tool **`reference_data_refresh`**.
 
 ---
 
+## Tool semantics contract (policy resource)
+
+Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. These are **not** embedded in `tools/list` JSON today; they are exposed as one MCP resource:
+
+| URI | MIME | Purpose |
+|-----|------|--------|
+| **`ridelogger://policy/tool-semantics`** | `application/json` | Per-tool policy: `kind`, `category`, `mutation`, `confirmation` (`none` \| `recommended` \| `required`), `risk`/`risk_level`, `side_effect_scope`, `idempotency`, `requires`, `provides` |
+
+- **Source of truth** in code: [`src/ridelogger_mcp/tool_semantics.py`](src/ridelogger_mcp/tool_semantics.py) (`TOOL_SEMANTICS`, `REGISTERED_TOOL_NAMES`).
+- **Envelope** includes `contract_version`, `tools` (name → policy), and `ok`.
+- **Rule for new tools**: add the `@mcp.tool` **and** an entry in `REGISTERED_TOOL_NAMES` / `TOOL_SEMANTICS`; `policy_resource_json()` calls `validate_registry()` so drift fails fast.
+
+---
+
 ## MCP tools (full catalog)
 
 **Auth:** `access_token` = optional if the HTTP client sends `Authorization: Bearer <JWT>` (middleware validates via `/api/auth/me`).
