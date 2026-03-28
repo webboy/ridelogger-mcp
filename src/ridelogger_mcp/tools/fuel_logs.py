@@ -9,7 +9,7 @@ from fastmcp import FastMCP
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tools.common import (
     MONEY_LOGS_HINT,
-    parse_json_object,
+    body_from_kwargs,
     require_token,
     tool_error,
 )
@@ -47,20 +47,37 @@ def register(mcp: FastMCP) -> None:
         name="fuel_logs_create",
         description=(
             "Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
-            "body_json: amount, currency_id, unit, unit_id, fuel_type_id, mileage, date (Y-m-d); "
-            "optional unit_price, uuid. "
-            "Monetary fields use the currency from `currency_id`. For totals across mixed-currency fills, use "
-            "`auth_me` + reference currencies — see fuel_logs_list hint."
+            "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, unit_id, fuel_type_id) "
+            "plus date (Y-m-d) for the vehicle log row; optional unit_price, uuid. "
+            + MONEY_LOGS_HINT
         ),
     )
     async def fuel_logs_create(
         vehicle_id: int,
-        body_json: str,
+        amount: float,
+        currency_id: int,
+        unit: float,
+        mileage: int,
+        unit_id: int,
+        fuel_type_id: int,
+        date: str,
+        unit_price: float | None = None,
+        uuid: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            body = body_from_kwargs(
+                amount=amount,
+                currency_id=currency_id,
+                unit=unit,
+                mileage=mileage,
+                unit_id=unit_id,
+                fuel_type_id=fuel_type_id,
+                date=date,
+                unit_price=unit_price,
+                uuid=uuid,
+            )
             st = get_state()
             data = await st.client.request_json(
                 "POST",
@@ -100,19 +117,38 @@ def register(mcp: FastMCP) -> None:
         name="fuel_logs_update",
         description=(
             "Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
-            "body_json: fields per API FuelLogUpdateRequest (including `currency_id` when changing currency). "
-            "See fuel_logs_list for multi-currency aggregation."
+            "Optional fields per FuelLogUpdateRequest (fuel row) plus vehicle log fields amount, currency_id, "
+            "mileage, date. "
+            + MONEY_LOGS_HINT
         ),
     )
     async def fuel_logs_update(
         vehicle_id: int,
         fuel_log_id: int,
-        body_json: str,
+        amount: float | None = None,
+        currency_id: int | None = None,
+        unit: float | None = None,
+        mileage: int | None = None,
+        unit_id: int | None = None,
+        fuel_type_id: int | None = None,
+        date: str | None = None,
+        unit_price: float | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            body = body_from_kwargs(
+                amount=amount,
+                currency_id=currency_id,
+                unit=unit,
+                mileage=mileage,
+                unit_id=unit_id,
+                fuel_type_id=fuel_type_id,
+                date=date,
+                unit_price=unit_price,
+            )
+            if not body:
+                raise ValueError("Provide at least one field to update.")
             st = get_state()
             data = await st.client.request_json(
                 "PUT",

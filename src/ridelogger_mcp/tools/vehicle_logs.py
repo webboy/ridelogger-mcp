@@ -12,7 +12,7 @@ from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tools.common import (
     MONEY_LOGS_HINT,
-    parse_json_object,
+    body_from_kwargs,
     require_token,
     tool_error,
 )
@@ -148,23 +148,33 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_log_files_upload_base64",
         description=(
             "Upload attachment via JSON body (POST .../put_files_cordova). "
-            "Requires access_token or HTTP Bearer. body_json: either chat_upload_id (UUID), "
-            "or vehicle_log_file (base64) + vehicle_log_file_name — mutually exclusive."
+            "Requires access_token or HTTP Bearer. "
+            "Either chat_upload_id (AI chat attachment UUID), or vehicle_log_file (base64) + vehicle_log_file_name — "
+            "mutually exclusive."
         ),
     )
     async def vehicle_log_files_upload_base64(
         vehicle_id: int,
         vehicle_log_id: int,
-        body_json: str,
+        chat_upload_id: str | None = None,
+        vehicle_log_file: str | None = None,
+        vehicle_log_file_name: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            if chat_upload_id and (vehicle_log_file or vehicle_log_file_name):
+                raise ValueError("Use either chat_upload_id or base64 file fields, not both.")
+            if chat_upload_id:
+                body: dict[str, Any] = {"chat_upload_id": chat_upload_id.strip()}
+            else:
+                if not vehicle_log_file or not vehicle_log_file_name:
+                    raise ValueError("Provide chat_upload_id, or both vehicle_log_file and vehicle_log_file_name.")
+                body = body_from_kwargs(
+                    vehicle_log_file=vehicle_log_file,
+                    vehicle_log_file_name=vehicle_log_file_name,
+                )
             st = get_state()
-            cid = body.get("chat_upload_id")
-            if cid and (body.get("vehicle_log_file") or body.get("vehicle_log_file_name")):
-                raise ValueError("Use either chat_upload_id or base64 fields in body_json, not both.")
             data = await st.client.request_json(
                 "POST",
                 f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files_cordova",

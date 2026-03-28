@@ -49,6 +49,11 @@ def parse_json_optional(label: str, raw: str | None) -> dict[str, Any] | None:
     return parse_json_object(label, raw)
 
 
+def body_from_kwargs(**kwargs: Any) -> dict[str, Any]:
+    """Build JSON body for API calls: omit keys whose value is None (optional fields omitted)."""
+    return {k: v for k, v in kwargs.items() if v is not None}
+
+
 def tool_error(e: Exception) -> dict[str, Any]:
     if isinstance(e, UpstreamApiError):
         return {

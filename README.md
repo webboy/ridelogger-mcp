@@ -50,7 +50,7 @@ Service `sk-mcp` uses `SK_API_URL=http://sk-api:8082` and maps port **8083**.
 The FastMCP app sets **`instructions`** on the server (what MCP clients expose as guidance for the model). Current text (see `src/ridelogger_mcp/app.py`):
 
 ```
-Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). Authenticate with auth_login (email/password) and pass access_token to tools, or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. Call auth_me to read user settings including preferred currency_id. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Use body_json parameters as JSON object strings matching the API request bodies.
+Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). Authenticate with auth_login (email/password) and pass access_token to tools, or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. Call auth_me to read user settings including preferred currency_id. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Write tools use typed parameters aligned with ridelogger-api FormRequest validation (see each tool's schema in list_tools).
 ```
 
 ---
@@ -112,17 +112,17 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | Tool | Token | Description |
 |------|-------|-------------|
 | `vehicles_list` | yes | GET `/api/vehicles` (optional `page`). |
-| `vehicles_create` | yes | POST `/api/vehicles` — `body_json`. |
+| `vehicles_create` | yes | POST `/api/vehicles` — typed fields (VehicleStoreRequest). |
 | `vehicles_get` | yes | GET `/api/vehicles/{id}`. |
-| `vehicles_update` | yes | PUT `/api/vehicles/{id}` — `body_json`. |
+| `vehicles_update` | yes | PUT `/api/vehicles/{id}` — typed fields (VehicleUpdateRequest). |
 
 **Plate history**
 
 | Tool | Token | Description |
 |------|-------|-------------|
 | `vehicle_plates_list` | yes | List plates for a vehicle. |
-| `vehicle_plates_create` | yes | Create plate — `body_json`. |
-| `vehicle_plates_update` | yes | Update plate — `body_json`. |
+| `vehicle_plates_create` | yes | Create plate — typed fields (VehiclePlateStoreRequest). |
+| `vehicle_plates_update` | yes | Update plate — typed fields (VehiclePlateUpdateRequest). |
 | `vehicle_plates_delete` | yes | Delete plate. |
 
 **Vehicle images**
@@ -131,7 +131,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 |------|-------|-------------|
 | `vehicle_images_list` | yes | List images for a vehicle. |
 | `vehicle_images_get` | yes | Get image bytes/metadata. |
-| `vehicle_images_create` | yes | Upload image — `body_json` / multipart per API. |
+| `vehicle_images_create` | yes | Upload image — multipart / chat_upload_id per API. |
 | `vehicle_images_delete` | yes | Delete image. |
 
 **Fuel logs** (multi-currency — see tool description for `currency_id` / aggregation)
@@ -139,9 +139,9 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | Tool | Token | Description |
 |------|-------|-------------|
 | `fuel_logs_list` | yes | GET `.../vehicles/{id}/fuel_logs`. |
-| `fuel_logs_create` | yes | POST — `body_json`. |
+| `fuel_logs_create` | yes | POST — typed body (FuelLogStoreRequest + date, …). |
 | `fuel_logs_get` | yes | GET one log. |
-| `fuel_logs_update` | yes | PUT — `body_json`. |
+| `fuel_logs_update` | yes | PUT — optional typed fields (FuelLogUpdateRequest + vehicle log fields). |
 | `fuel_logs_delete` | yes | DELETE. |
 
 **Service logs** (multi-currency)
@@ -149,9 +149,9 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | Tool | Token | Description |
 |------|-------|-------------|
 | `service_logs_list` | yes | GET `.../vehicles/{id}/service_logs`. |
-| `service_logs_create` | yes | POST — `body_json`. |
+| `service_logs_create` | yes | POST — typed body (ServiceLogStoreRequest + date, …). |
 | `service_logs_get` | yes | GET one log. |
-| `service_logs_update` | yes | PUT — `body_json`. |
+| `service_logs_update` | yes | PUT — optional typed fields. |
 | `service_logs_delete` | yes | DELETE. |
 
 **Expense logs** (multi-currency)
@@ -159,9 +159,9 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | Tool | Token | Description |
 |------|-------|-------------|
 | `expense_logs_list` | yes | GET `.../vehicles/{id}/expense_logs`. |
-| `expense_logs_create` | yes | POST — `body_json`. |
+| `expense_logs_create` | yes | POST — typed body (ExpenseLogStoreRequest + date, …). |
 | `expense_logs_get` | yes | GET one log. |
-| `expense_logs_update` | yes | PUT — `body_json`. |
+| `expense_logs_update` | yes | PUT — optional typed fields. |
 | `expense_logs_delete` | yes | DELETE. |
 
 **Generic vehicle logs & attachments**
@@ -172,11 +172,11 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `generic_vehicle_logs_delete` | yes | DELETE a generic vehicle log row. |
 | `vehicle_log_files_list` | yes | List files on a vehicle log. |
 | `vehicle_log_files_upload` | yes | Multipart upload (file path or base64). |
-| `vehicle_log_files_upload_base64` | yes | Upload via base64 payload. |
+| `vehicle_log_files_upload_base64` | yes | Upload via JSON — `chat_upload_id` or base64 file + name. |
 | `vehicle_log_files_delete` | yes | Delete attachment. |
 | `vehicle_log_files_download` | yes | Download attachment bytes. |
 
-Create/update tools that take **`body_json`** expect a JSON **object string** matching the Laravel API bodies (see Scribe docs when `sk-api` is running).
+Create/update tools expose **explicit parameters**; shapes match **ridelogger-api** FormRequest classes (see `list_tools` → `inputSchema`). Scribe docs on `sk-api` remain the human-readable reference.
 
 ---
 
@@ -185,7 +185,7 @@ Create/update tools that take **`body_json`** expect a JSON **object string** ma
 1. **Health**: `curl -s http://localhost:8083/health`
 2. **Login** (tool `auth_login` or `curl -X POST http://localhost:8082/api/auth/login -H 'Content-Type: application/json' -d '{"email":"...","password":"..."}'`)
 3. **List vehicles** with returned `access_token` via tool `vehicles_list`
-4. **Fuel log**: `fuel_logs_create` with `body_json` for amount, currency_id, unit, unit_id, fuel_type_id, mileage, date
+4. **Fuel log**: `fuel_logs_create` with amount, currency_id, unit, unit_id, fuel_type_id, mileage, date (and optional fields)
 5. **Service logs**: `service_logs_list`
 6. **File on vehicle log**: `vehicle_log_files_upload` or `vehicle_log_files_upload_base64` for an existing `vehicle_log_id`
 

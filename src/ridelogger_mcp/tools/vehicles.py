@@ -7,7 +7,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
-from ridelogger_mcp.tools.common import parse_json_object, require_token, tool_error
+from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
@@ -44,16 +44,45 @@ def register(mcp: FastMCP) -> None:
         name="vehicles_create",
         description=(
             "Create a vehicle (POST /api/vehicles). Requires access_token or HTTP Bearer. "
-            "body_json: JSON object with required fields: vehicle_type_id, vehicle_make_id, "
-            "vehicle_model_id, mileage, mileage_unit_id, fuel_type_id, label, production_year; "
-            "optional: plate, valid_to, engine_displacement, engine_power_kw, engine_power_hp, country_id (for plate flow). "
-            "See API docs for exact types."
+            "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
+            "mileage_unit_id, fuel_type_id, label, production_year are required; vehicle_model_id is required "
+            "when vehicle_type_id is 1 (car). Optional: plate, valid_to, engine_displacement, engine_power_kw, "
+            "engine_power_hp."
         ),
     )
-    async def vehicles_create(body_json: str, access_token: str | None = None) -> dict[str, Any]:
+    async def vehicles_create(
+        vehicle_type_id: int,
+        vehicle_make_id: int,
+        mileage: int,
+        mileage_unit_id: int,
+        fuel_type_id: int,
+        label: str,
+        production_year: int,
+        vehicle_model_id: int | None = None,
+        plate: str | None = None,
+        valid_to: str | None = None,
+        engine_displacement: int | None = None,
+        engine_power_kw: int | None = None,
+        engine_power_hp: int | None = None,
+        access_token: str | None = None,
+    ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            body = body_from_kwargs(
+                vehicle_type_id=vehicle_type_id,
+                vehicle_make_id=vehicle_make_id,
+                vehicle_model_id=vehicle_model_id,
+                mileage=mileage,
+                mileage_unit_id=mileage_unit_id,
+                fuel_type_id=fuel_type_id,
+                label=label,
+                production_year=production_year,
+                plate=plate,
+                valid_to=valid_to,
+                engine_displacement=engine_displacement,
+                engine_power_kw=engine_power_kw,
+                engine_power_hp=engine_power_hp,
+            )
             st = get_state()
             data = await st.client.request_json(
                 "POST",
@@ -88,17 +117,43 @@ def register(mcp: FastMCP) -> None:
         name="vehicles_update",
         description=(
             "Update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
-            "body_json: JSON object with fields to update (same family as create — see API docs)."
+            "Body matches VehicleUpdateRequest (same fields as create in API). Send all required fields."
         ),
     )
     async def vehicles_update(
         vehicle_id: int,
-        body_json: str,
+        vehicle_type_id: int,
+        vehicle_make_id: int,
+        mileage: int,
+        mileage_unit_id: int,
+        fuel_type_id: int,
+        label: str,
+        production_year: int,
+        vehicle_model_id: int | None = None,
+        plate: str | None = None,
+        valid_to: str | None = None,
+        engine_displacement: int | None = None,
+        engine_power_kw: int | None = None,
+        engine_power_hp: int | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            body = body_from_kwargs(
+                vehicle_type_id=vehicle_type_id,
+                vehicle_make_id=vehicle_make_id,
+                vehicle_model_id=vehicle_model_id,
+                mileage=mileage,
+                mileage_unit_id=mileage_unit_id,
+                fuel_type_id=fuel_type_id,
+                label=label,
+                production_year=production_year,
+                plate=plate,
+                valid_to=valid_to,
+                engine_displacement=engine_displacement,
+                engine_power_kw=engine_power_kw,
+                engine_power_hp=engine_power_hp,
+            )
             st = get_state()
             data = await st.client.request_json(
                 "PUT",

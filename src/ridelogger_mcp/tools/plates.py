@@ -7,7 +7,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
-from ridelogger_mcp.tools.common import parse_json_object, require_token, tool_error
+from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
@@ -38,17 +38,27 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_plates_create",
         description=(
             "Create plate (POST .../vehicle_plates). Requires access_token or HTTP Bearer. "
-            "body_json: plate, country_id, valid_from, valid_to, uuid (required per API)."
+            "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid."
         ),
     )
     async def vehicle_plates_create(
         vehicle_id: int,
-        body_json: str,
+        plate: str,
+        country_id: int,
+        valid_from: str,
+        valid_to: str,
+        uuid: str,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            body = body_from_kwargs(
+                plate=plate,
+                country_id=country_id,
+                valid_from=valid_from,
+                valid_to=valid_to,
+                uuid=uuid,
+            )
             st = get_state()
             data = await st.client.request_json(
                 "POST",
@@ -64,18 +74,26 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_plates_update",
         description=(
             "Update plate (PUT .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer. "
-            "body_json: fields to update per API."
+            "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to."
         ),
     )
     async def vehicle_plates_update(
         vehicle_id: int,
         plate_id: int,
-        body_json: str,
+        plate: str,
+        country_id: int,
+        valid_from: str,
+        valid_to: str,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
-            body = parse_json_object("body_json", body_json)
+            body = body_from_kwargs(
+                plate=plate,
+                country_id=country_id,
+                valid_from=valid_from,
+                valid_to=valid_to,
+            )
             st = get_state()
             data = await st.client.request_json(
                 "PUT",
