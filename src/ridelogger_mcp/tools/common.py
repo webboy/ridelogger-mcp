@@ -54,6 +54,12 @@ def body_from_kwargs(**kwargs: Any) -> dict[str, Any]:
     return {k: v for k, v in kwargs.items() if v is not None}
 
 
+def compact_query_params(values: dict[str, Any]) -> dict[str, Any] | None:
+    """Build GET query dict: drop None values; return None if empty (caller may pass through to HTTP client)."""
+    out = {k: v for k, v in values.items() if v is not None}
+    return out or None
+
+
 def tool_error(e: Exception) -> dict[str, Any]:
     if isinstance(e, UpstreamApiError):
         return {

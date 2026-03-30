@@ -10,6 +10,7 @@ from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tools.common import (
     MONEY_LOGS_HINT,
     body_from_kwargs,
+    compact_query_params,
     require_token,
     tool_error,
 )
@@ -21,18 +22,32 @@ def register(mcp: FastMCP) -> None:
         description=(
             "List fuel logs for a vehicle (GET /api/vehicles/{vehicle_id}/fuel_logs). "
             "Requires access_token or HTTP Bearer. Optional page for pagination. "
+            "Filters (passed as query params to the API, combined with AND): date_from -> `from`, date_to -> `to` (Y-m-d, inclusive bounds), "
+            "currency_id, fuel_type_id. "
             + MONEY_LOGS_HINT
         ),
     )
     async def fuel_logs_list(
         vehicle_id: int,
         page: int | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        currency_id: int | None = None,
+        fuel_type_id: int | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
             st = get_state()
-            params = {"page": page} if page is not None else None
+            params = compact_query_params(
+                {
+                    "page": page,
+                    "from": date_from,
+                    "to": date_to,
+                    "currency_id": currency_id,
+                    "fuel_type_id": fuel_type_id,
+                }
+            )
             data = await st.client.request_json(
                 "GET",
                 f"/vehicles/{vehicle_id}/fuel_logs",
