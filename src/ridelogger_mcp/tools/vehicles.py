@@ -16,12 +16,16 @@ def register(mcp: FastMCP) -> None:
         description=(
             "List vehicles the user can manage (GET /api/vehicles). "
             "Requires access_token or HTTP Bearer. "
+            "Optional filters: vehicle_make_id, vehicle_model_id, production_year (query params). "
             "Optional page for paginated responses if API supports it. "
             "Returns { data: [...] }."
         ),
     )
     async def vehicles_list(
         page: int | None = None,
+        vehicle_make_id: int | None = None,
+        vehicle_model_id: int | None = None,
+        production_year: int | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
@@ -30,6 +34,12 @@ def register(mcp: FastMCP) -> None:
             params: dict[str, Any] = {}
             if page is not None:
                 params["page"] = page
+            if vehicle_make_id is not None:
+                params["vehicle_make_id"] = vehicle_make_id
+            if vehicle_model_id is not None:
+                params["vehicle_model_id"] = vehicle_model_id
+            if production_year is not None:
+                params["production_year"] = production_year
             data = await st.client.request_json(
                 "GET",
                 "/vehicles",
