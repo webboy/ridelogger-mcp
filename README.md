@@ -171,8 +171,8 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `generic_vehicle_logs_list` | yes | GET `.../vehicles/{id}/vehicle_logs` (aggregated fuel/service/expense). |
 | `generic_vehicle_logs_delete` | yes | DELETE a generic vehicle log row. |
 | `vehicle_log_files_list` | yes | List files on a vehicle log. |
-| `vehicle_log_files_upload` | yes | Multipart upload (file path or base64). |
-| `vehicle_log_files_upload_base64` | yes | Upload via JSON — `chat_upload_id` or base64 file + name. |
+| `vehicle_log_files_upload` | yes | Multipart upload (file path or base64). Free tier: one attachment per log (403 if full). |
+| `vehicle_log_files_upload_base64` | yes | Upload via JSON — `chat_upload_id` or base64 file + name. Same one-file limit for non-premium. |
 | `vehicle_log_files_delete` | yes | Delete attachment. |
 | `vehicle_log_files_download` | yes | Download attachment bytes. |
 

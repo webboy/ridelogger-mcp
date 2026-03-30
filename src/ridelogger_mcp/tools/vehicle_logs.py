@@ -96,7 +96,9 @@ def register(mcp: FastMCP) -> None:
         description=(
             "Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
             "Requires access_token or HTTP Bearer. Exactly one of: chat_upload_id (AI chat attachment UUID), "
-            "or file_base64 + file_name, or file_path."
+            "or file_base64 + file_name, or file_path. "
+            "Non-premium users: at most one attachment per vehicle log; if one already exists, API returns 403 "
+            "(remove it with vehicle_log_files_delete or use a premium account). Premium: multiple attachments allowed."
         ),
     )
     async def vehicle_log_files_upload(
@@ -150,7 +152,9 @@ def register(mcp: FastMCP) -> None:
             "Upload attachment via JSON body (POST .../put_files_cordova). "
             "Requires access_token or HTTP Bearer. "
             "Either chat_upload_id (AI chat attachment UUID), or vehicle_log_file (base64) + vehicle_log_file_name — "
-            "mutually exclusive."
+            "mutually exclusive. "
+            "Non-premium: max one file per log (403 if a file is already attached; delete first or upgrade). "
+            "Premium: multiple allowed."
         ),
     )
     async def vehicle_log_files_upload_base64(
