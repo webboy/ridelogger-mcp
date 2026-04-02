@@ -81,6 +81,25 @@ async def health_check(_request: Request) -> JSONResponse:
     )
 
 
+@mcp.custom_route("/.well-known/oauth-protected-resource", methods=["GET"])
+async def oauth_protected_resource(_request: Request) -> JSONResponse:
+    settings = Settings()
+    return JSONResponse({
+        "resource": settings.oauth_resource_url,
+        "authorization_servers": [settings.oauth_authorization_server],
+        "scopes_supported": [
+            "profile:read",
+            "vehicles:read",
+            "vehicles:write",
+            "logs:read",
+            "logs:write",
+            "files:read",
+            "files:write",
+        ],
+        "bearer_methods_supported": ["header"],
+    })
+
+
 def run_server() -> None:
     settings = Settings()
     setup_logging(

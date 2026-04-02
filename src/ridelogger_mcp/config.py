@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     http_timeout_s: float = Field(default=30.0, validation_alias="HTTP_TIMEOUT_S")
     http_max_retries: int = Field(default=2, validation_alias="HTTP_MAX_RETRIES")
 
+    oauth_authorization_server: str = Field(
+        default="https://api.servisna-knjizica.com",
+        validation_alias="OAUTH_AUTHORIZATION_SERVER",
+    )
+    oauth_resource_url: str = Field(
+        default="https://mcp.servisna-knjizica.com/mcp",
+        validation_alias="OAUTH_RESOURCE_URL",
+    )
+
     host: str = Field(default="0.0.0.0", validation_alias="MCP_HOST")
     port: int = Field(default=8083, validation_alias="MCP_PORT")
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
