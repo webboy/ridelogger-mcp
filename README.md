@@ -46,6 +46,8 @@ make mcp-logs
 
 Service `sk-mcp` uses `SK_API_URL=http://sk-api:8082` and maps port **8083**.
 
+**HMAC (`~/sk/docker/docker-compose.yml`):** `sk-api` runs `php artisan migrate` + `db:seed`, which calls `ApiConsumersBootstrapSeeder` (creates `pwa` / `mcp` consumers and, in `local` + enabled env, a dev key `docker-local`). `sk-mcp` gets matching `API_CONSUMER_KEY_ID` / `API_CONSUMER_SECRET`. On production use `php artisan api-consumers:rotate-key mcp` and set those env vars from the one-time output — do not use the compose dev secret.
+
 ---
 
 ## MCP server instructions (host prompt)
