@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     http_timeout_s: float = Field(default=30.0, validation_alias="HTTP_TIMEOUT_S")
     http_max_retries: int = Field(default=2, validation_alias="HTTP_MAX_RETRIES")
 
+    api_consumer_code: str = Field(default="mcp", validation_alias="API_CONSUMER_CODE")
+    api_consumer_key_id: str = Field(default="", validation_alias="API_CONSUMER_KEY_ID")
+    api_consumer_secret: str = Field(default="", validation_alias="API_CONSUMER_SECRET")
+
     oauth_authorization_server: str = Field(
         default="https://api.servisna-knjizica.com",
         validation_alias="OAUTH_AUTHORIZATION_SERVER",

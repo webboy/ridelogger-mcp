@@ -7,6 +7,9 @@ HTTP [MCP](https://modelcontextprotocol.io/) server ([FastMCP](https://gofastmcp
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `SK_API_URL` | **yes** | API base URL **without** trailing `/api` (e.g. `http://localhost:8082` or `http://sk-api:8082` in Docker). |
+| `API_CONSUMER_CODE` | no | Consumer code sent as `X-Api-Consumer` when signing (default `mcp`). |
+| `API_CONSUMER_KEY_ID` | no | Public key id from `api-consumers:rotate-key` on the API. If empty (with secret also empty), requests are **not** HMAC-signed (backward compatible). |
+| `API_CONSUMER_SECRET` | no | Plain signing secret shown **once** by the API rotate-key command. Never commit this value. |
 | `REFERENCE_CACHE_TTL_SECONDS` | no | Reference dataset refresh interval (default `3600`). |
 | `HTTP_TIMEOUT_S` | no | Upstream HTTP timeout (default `30`). |
 | `MCP_HOST` | no | Bind address (default `0.0.0.0`). |

@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import logging
+import time
+import uuid
 from typing import Any
 
 import httpx
@@ -19,6 +23,25 @@ from ridelogger_mcp.logging_setup import get_request_id
 
 logger = logging.getLogger(__name__)
 
+_UNSIGNED_PAYLOAD = "UNSIGNED-PAYLOAD"
+_SIG_VERSION = "v1"
+
+
+def _request_target(url: httpx.URL) -> str:
+    q = url.query.decode("ascii") if url.query else ""
+    return url.path + (f"?{q}" if q else "")
+
+
+def _canonical_string(
+    method: str,
+    request_target: str,
+    timestamp: str,
+    nonce: str,
+    content_sha256: str,
+) -> bytes:
+    parts = [method.upper(), request_target, timestamp, nonce, content_sha256]
+    return "\n".join(parts).encode("utf-8")
+
 
 class ApiClient:
     def __init__(self, settings: Settings) -> None:
@@ -32,6 +55,13 @@ class ApiClient:
     async def aclose(self) -> None:
         await self._client.aclose()
 
+    @property
+    def _signing_enabled(self) -> bool:
+        s = self._settings
+        return bool(
+            (s.api_consumer_secret or "").strip() and (s.api_consumer_key_id or "").strip()
+        )
+
     def _headers(self, token: str | None) -> dict[str, str]:
         h: dict[str, str] = {}
         rid = get_request_id()
@@ -40,6 +70,33 @@ class ApiClient:
         if token:
             h["Authorization"] = f"Bearer {token}"
         return h
+
+    def _signing_headers(
+        self,
+        *,
+        method: str,
+        url: httpx.URL,
+        content_sha256_for_sig: str,
+    ) -> dict[str, str]:
+        ts = str(int(time.time()))
+        nonce = str(uuid.uuid4())
+        request_target = _request_target(url)
+        canonical = _canonical_string(
+            method, request_target, ts, nonce, content_sha256_for_sig
+        )
+        secret = self._settings.api_consumer_secret.strip().encode("utf-8")
+        sig_hex = hmac.new(secret, canonical, hashlib.sha256).hexdigest()
+        code = (self._settings.api_consumer_code or "").strip() or "mcp"
+        kid = self._settings.api_consumer_key_id.strip()
+
+        return {
+            "X-Api-Consumer": code,
+            "X-Api-Key-Id": kid,
+            "X-Api-Timestamp": ts,
+            "X-Api-Nonce": nonce,
+            "X-Api-Content-SHA256": content_sha256_for_sig,
+            "X-Api-Signature": f"{_SIG_VERSION}={sig_hex}",
+        }
 
     async def request(
         self,
@@ -52,15 +109,34 @@ class ApiClient:
         files: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        return await self._client.request(
+        base_headers = self._headers(token)
+        req = self._client.build_request(
             method,
             path,
-            headers=self._headers(token),
+            headers=base_headers,
             params=params,
             json=json_body,
             files=files,
             data=data,
         )
+
+        if self._signing_enabled:
+            use_unsigned = bool(files)
+            if use_unsigned:
+                sha_for_sig = _UNSIGNED_PAYLOAD
+            else:
+                body = req.content or b""
+                sha_for_sig256 = hashlib.sha256(body).hexdigest()
+                sha_for_sig = sha_for_sig256.lower()
+
+            for k, v in self._signing_headers(
+                method=method,
+                url=req.url,
+                content_sha256_for_sig=sha_for_sig,
+            ).items():
+                req.headers[k] = v
+
+        return await self._client.send(req)
 
     async def request_json(
         self,
@@ -107,6 +183,6 @@ class ApiClient:
     )
     async def get_public_json(self, path: str) -> Any:
         """GET without auth — used for reference data preload."""
-        resp = await self._client.get(path, headers=self._headers(None))
+        resp = await self.request("GET", path, token=None)
         raise_for_status(resp)
         return resp.json()
