@@ -41,7 +41,16 @@ async def lifespan_fn(server: FastMCP) -> None:
         cache=cache,
         refresh_task=refresh_task,
     )
-    logger.info("RideLogger MCP ready (reference cache loaded)")
+    hmac_on = bool(
+        (settings.api_consumer_key_id or "").strip()
+        and (settings.api_consumer_secret or "").strip()
+    )
+    logger.info(
+        "RideLogger MCP ready — SK_API_URL=%s consumer=%s HMAC_signing=%s",
+        settings.sk_api_url,
+        (settings.api_consumer_code or "mcp").strip() or "mcp",
+        hmac_on,
+    )
     yield {}
     refresh_task.cancel()
     try:
@@ -76,8 +85,26 @@ register_resources(mcp)
 
 @mcp.custom_route("/health", methods=["GET"])
 async def health_check(_request: Request) -> JSONResponse:
+    settings = Settings()
+    kid = (settings.api_consumer_key_id or "").strip()
+    secret_on = bool((settings.api_consumer_secret or "").strip())
+    key_id_configured = bool(kid)
+    hmac_signing_configured = key_id_configured and secret_on
+    code = (settings.api_consumer_code or "mcp").strip() or "mcp"
+    key_hint = kid[:6] + "…" if len(kid) > 6 else kid
     return JSONResponse(
-        {"ok": True, "service": "ridelogger-mcp", "version": __version__},
+        {
+            "ok": True,
+            "service": "ridelogger-mcp",
+            "version": __version__,
+            "api_upstream": settings.sk_api_url,
+            "api_consumer": {
+                "code": code,
+                "key_id_configured": key_id_configured,
+                "key_id_hint": key_hint,
+                "hmac_signing_configured": hmac_signing_configured,
+            },
+        },
     )
 
 
