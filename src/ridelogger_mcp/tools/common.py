@@ -14,6 +14,22 @@ MONEY_LOGS_HINT = (
     "(account settings), use MCP resource `ridelogger://reference/currencies` (or GET /api/currencies) for codes and "
     "exchange `value` fields, then normalize every row to one target currency before aggregating or comparing totals."
 )
+
+# Embedded reference objects in vehicle responses (API v1.3+).
+VEHICLE_REFS_HINT = (
+    "Each vehicle includes resolved reference objects alongside raw IDs: "
+    "vehicle_type {id,name}, fuel_type {id,name}, mileage_unit {id,name,unit,ratio}, "
+    "fuel_unit {id,name,unit,units,ratio}, vehicle_make_info {id,name}, vehicle_model_info {id,name}. "
+    "Use these instead of cross-referencing IDs with ridelogger://reference/* resources."
+)
+
+# Embedded reference objects in log responses (API v1.3+).
+LOG_REFS_HINT = (
+    "Each log row includes resolved reference objects alongside raw IDs: "
+    "fuel_type {id,name} (fuel logs), service_type {id,name} (service logs), "
+    "expense_type {id,name} (expense logs), unit_label (fuel unit name string), "
+    "currency_info {id,code,name,symbol}. Null when the field does not apply to the log type."
+)
 from ridelogger_mcp.errors import UpstreamApiError
 from ridelogger_mcp.logging_setup import new_request_id
 

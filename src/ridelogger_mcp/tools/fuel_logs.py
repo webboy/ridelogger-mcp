@@ -8,6 +8,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tools.common import (
+    LOG_REFS_HINT,
     MONEY_LOGS_HINT,
     body_from_kwargs,
     compact_query_params,
@@ -24,7 +25,7 @@ def register(mcp: FastMCP) -> None:
             "Requires access_token or HTTP Bearer. Optional page for pagination. "
             "Filters (passed as query params to the API, combined with AND): date_from -> `from`, date_to -> `to` (Y-m-d, inclusive bounds), "
             "currency_id, fuel_type_id. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def fuel_logs_list(
@@ -64,7 +65,7 @@ def register(mcp: FastMCP) -> None:
             "Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
             "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, unit_id, fuel_type_id) "
             "plus date (Y-m-d) for the vehicle log row; optional unit_price, uuid. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def fuel_logs_create(
@@ -108,7 +109,7 @@ def register(mcp: FastMCP) -> None:
         name="fuel_logs_get",
         description=(
             "Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def fuel_logs_get(
@@ -134,7 +135,7 @@ def register(mcp: FastMCP) -> None:
             "Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
             "Optional fields per FuelLogUpdateRequest (fuel row) plus vehicle log fields amount, currency_id, "
             "mileage, date. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def fuel_logs_update(

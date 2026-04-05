@@ -8,6 +8,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tools.common import (
+    LOG_REFS_HINT,
     MONEY_LOGS_HINT,
     body_from_kwargs,
     compact_query_params,
@@ -23,7 +24,7 @@ def register(mcp: FastMCP) -> None:
             "List expense logs for a vehicle (GET /api/vehicles/{vehicle_id}/expense_logs). "
             "Requires access_token or HTTP Bearer. Optional page. "
             "Filters: date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), currency_id, expense_type_id. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def expense_logs_list(
@@ -63,7 +64,7 @@ def register(mcp: FastMCP) -> None:
             "Create expense log (POST .../expense_logs). Requires access_token or HTTP Bearer. "
             "ExpenseLogStoreRequest: amount, currency_id, mileage, expense_type_id, title; "
             "plus date (Y-m-d) for vehicle log; optional description, uuid. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def expense_logs_create(
@@ -105,7 +106,7 @@ def register(mcp: FastMCP) -> None:
         name="expense_logs_get",
         description=(
             "Get one expense log (GET .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def expense_logs_get(
@@ -131,7 +132,7 @@ def register(mcp: FastMCP) -> None:
             "Update expense log (PUT .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
             "Optional: amount, currency_id, mileage, expense_type_id (ExpenseLogUpdateRequest); "
             "optional title, description, date (controller merges vehicle log + expense row). "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def expense_logs_update(

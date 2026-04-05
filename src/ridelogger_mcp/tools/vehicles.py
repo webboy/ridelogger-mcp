@@ -7,7 +7,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
-from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error
+from ridelogger_mcp.tools.common import VEHICLE_REFS_HINT, body_from_kwargs, require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
@@ -18,7 +18,8 @@ def register(mcp: FastMCP) -> None:
             "Requires access_token or HTTP Bearer. "
             "Optional filters: vehicle_make_id, vehicle_model_id, production_year (query params). "
             "Optional page for paginated responses if API supports it. "
-            "Returns { data: [...] }."
+            "Returns { data: [...] }. "
+            + VEHICLE_REFS_HINT
         ),
     )
     async def vehicles_list(
@@ -57,7 +58,8 @@ def register(mcp: FastMCP) -> None:
             "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
             "mileage_unit_id, fuel_type_id, label, production_year are required; vehicle_model_id is required "
             "when vehicle_type_id is 1 (car). Optional: plate, valid_to, engine_displacement, engine_power_kw, "
-            "engine_power_hp."
+            "engine_power_hp. "
+            "Response includes the created vehicle. " + VEHICLE_REFS_HINT
         ),
     )
     async def vehicles_create(
@@ -107,7 +109,8 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_get",
         description=(
-            "Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer."
+            "Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
+            + VEHICLE_REFS_HINT
         ),
     )
     async def vehicles_get(vehicle_id: int, access_token: str | None = None) -> dict[str, Any]:
@@ -127,7 +130,8 @@ def register(mcp: FastMCP) -> None:
         name="vehicles_update",
         description=(
             "Update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
-            "Body matches VehicleUpdateRequest (same fields as create in API). Send all required fields."
+            "Body matches VehicleUpdateRequest (same fields as create in API). Send all required fields. "
+            "Response includes the updated vehicle. " + VEHICLE_REFS_HINT
         ),
     )
     async def vehicles_update(

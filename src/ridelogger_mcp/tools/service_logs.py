@@ -8,6 +8,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tools.common import (
+    LOG_REFS_HINT,
     MONEY_LOGS_HINT,
     body_from_kwargs,
     compact_query_params,
@@ -23,7 +24,7 @@ def register(mcp: FastMCP) -> None:
             "List service logs for a vehicle (GET /api/vehicles/{vehicle_id}/service_logs). "
             "Requires access_token or HTTP Bearer. Optional page. "
             "Filters: date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), currency_id, service_type_id. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def service_logs_list(
@@ -63,7 +64,7 @@ def register(mcp: FastMCP) -> None:
             "Create service log (POST .../service_logs). Requires access_token or HTTP Bearer. "
             "ServiceLogStoreRequest: amount, currency_id, mileage, service_type_id, title; "
             "plus date (Y-m-d) for vehicle log; optional description, uuid. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def service_logs_create(
@@ -105,7 +106,7 @@ def register(mcp: FastMCP) -> None:
         name="service_logs_get",
         description=(
             "Get one service log (GET .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def service_logs_get(
@@ -130,7 +131,7 @@ def register(mcp: FastMCP) -> None:
         description=(
             "Update service log (PUT .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
             "Optional: amount, currency_id, mileage, service_type_id, title, description, date (per API controller). "
-            + MONEY_LOGS_HINT
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def service_logs_update(
