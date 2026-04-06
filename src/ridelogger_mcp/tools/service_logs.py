@@ -21,7 +21,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_list",
         description=(
-            "List service logs for a vehicle (GET /api/vehicles/{vehicle_id}/service_logs). "
+            "[READ] List service logs for a vehicle (GET /api/vehicles/{vehicle_id}/service_logs). "
             "Requires access_token or HTTP Bearer. Optional page. "
             "Filters: date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), currency_id, service_type_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -61,7 +61,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_create",
         description=(
-            "Create service log (POST .../service_logs). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create service log (POST .../service_logs). Requires access_token or HTTP Bearer. "
             "ServiceLogStoreRequest: amount, currency_id, mileage, service_type_id, title; "
             "plus date (Y-m-d) for vehicle log; optional description, uuid. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -105,7 +105,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_get",
         description=(
-            "Get one service log (GET .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one service log (GET .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -129,7 +129,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_update",
         description=(
-            "Update service log (PUT .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update service log (PUT .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
             "Optional: amount, currency_id, mileage, service_type_id, title, description, date (per API controller). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
@@ -173,7 +173,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_delete",
         description=(
-            "Delete service log (DELETE .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete service log (DELETE .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer."
         ),
     )
     async def service_logs_delete(

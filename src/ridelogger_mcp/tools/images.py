@@ -17,7 +17,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_list",
         description=(
-            "List gallery images for a vehicle (GET /api/vehicles/{vehicle_id}/images). "
+            "[READ] List gallery images for a vehicle (GET /api/vehicles/{vehicle_id}/images). "
             "Requires access_token or HTTP Bearer."
         ),
     )
@@ -40,7 +40,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_get",
         description=(
-            "Download one gallery image (GET /api/vehicles/{vehicle_id}/images/{image_id}). "
+            "[READ] Download one gallery image (GET /api/vehicles/{vehicle_id}/images/{image_id}). "
             "Requires access_token or HTTP Bearer. Returns JSON with base64, content_type, filename_hint."
         ),
     )
@@ -77,7 +77,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_create",
         description=(
-            "Upload a gallery image (POST /api/vehicles/{vehicle_id}/images). "
+            "[WRITE] Upload a gallery image (POST /api/vehicles/{vehicle_id}/images). "
             "Requires access_token or HTTP Bearer. "
             "Exactly one of: (1) chat_upload_id — UUID from AI chat attachment (ai_chat_uploaded_files), "
             "(2) file_base64 + file_name, (3) file_path on the MCP host. "
@@ -131,7 +131,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_delete",
         description=(
-            "Delete gallery image (DELETE .../images/{image_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete gallery image (DELETE .../images/{image_id}). Requires access_token or HTTP Bearer."
         ),
     )
     async def vehicle_images_delete(

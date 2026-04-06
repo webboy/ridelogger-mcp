@@ -53,6 +53,8 @@ def raise_for_status(resp: httpx.Response) -> None:
     hint = ""
     if resp.status_code == 401:
         hint = " Token may be expired or invalid; call auth_login again."
+    elif resp.status_code == 402:
+        hint = " Premium plan required for this action."
     elif resp.status_code == 403:
         hint = " You may lack permission for this vehicle or action."
     elif resp.status_code == 404:

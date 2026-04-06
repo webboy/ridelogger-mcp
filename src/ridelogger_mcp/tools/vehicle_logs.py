@@ -23,7 +23,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_list",
         description=(
-            "List all vehicle log entries for a vehicle (fuel, service, expense) — "
+            "[READ] List all vehicle log entries for a vehicle (fuel, service, expense) — "
             "GET /api/vehicles/{vehicle_id}/vehicle_logs. Requires access_token or HTTP Bearer. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
@@ -47,7 +47,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_delete",
         description=(
-            "Delete a generic vehicle log row (DELETE /api/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}). "
+            "[WRITE] Delete a generic vehicle log row (DELETE /api/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}). "
             "Requires access_token or HTTP Bearer. Returns 202 on success."
         ),
     )
@@ -71,7 +71,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_list",
         description=(
-            "List file attachments on a vehicle log (GET .../vehicle_logs/{vehicle_log_id}/get_files). "
+            "[READ] List file attachments on a vehicle log (GET .../vehicle_logs/{vehicle_log_id}/get_files). "
             "Requires access_token or HTTP Bearer."
         ),
     )
@@ -95,7 +95,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload",
         description=(
-            "Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
+            "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
             "Requires access_token or HTTP Bearer. Exactly one of: chat_upload_id (AI chat attachment UUID), "
             "or file_base64 + file_name, or file_path. "
             "Non-premium users: at most one attachment per vehicle log; if one already exists, API returns 403 "
@@ -150,7 +150,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload_base64",
         description=(
-            "Upload attachment via JSON body (POST .../put_files_cordova). "
+            "[WRITE] Upload attachment via JSON body (POST .../put_files_cordova). "
             "Requires access_token or HTTP Bearer. "
             "Either chat_upload_id (AI chat attachment UUID), or vehicle_log_file (base64) + vehicle_log_file_name — "
             "mutually exclusive. "
@@ -193,7 +193,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_delete",
         description=(
-            "Delete one attachment by media uuid (DELETE .../delete_files/{uuid}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete one attachment by media uuid (DELETE .../delete_files/{uuid}). Requires access_token or HTTP Bearer."
         ),
     )
     async def vehicle_log_files_delete(
@@ -217,7 +217,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_download",
         description=(
-            "Download attachment bytes as base64 (GET .../download_files/{uuid}). Requires access_token or HTTP Bearer."
+            "[READ] Download attachment bytes as base64 (GET .../download_files/{uuid}). Requires access_token or HTTP Bearer."
         ),
     )
     async def vehicle_log_files_download(

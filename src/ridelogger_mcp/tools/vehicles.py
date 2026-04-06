@@ -14,7 +14,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_list",
         description=(
-            "List vehicles the user can manage (GET /api/vehicles). "
+            "[READ] List vehicles the user can manage (GET /api/vehicles). "
             "Requires access_token or HTTP Bearer. "
             "Optional filters: vehicle_make_id, vehicle_model_id, production_year (query params). "
             "Optional page for paginated responses if API supports it. "
@@ -54,7 +54,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_create",
         description=(
-            "Create a vehicle (POST /api/vehicles). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create a vehicle (POST /api/vehicles). Requires access_token or HTTP Bearer. "
             "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
             "mileage_unit_id, fuel_type_id, label, production_year are required; vehicle_model_id is required "
             "when vehicle_type_id is 1 (car). Optional: plate, valid_to, engine_displacement, engine_power_kw, "
@@ -109,7 +109,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_get",
         description=(
-            "Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
             + VEHICLE_REFS_HINT
         ),
     )
@@ -129,7 +129,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_update",
         description=(
-            "Update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
             "Body matches VehicleUpdateRequest (same fields as create in API). Send all required fields. "
             "Response includes the updated vehicle. " + VEHICLE_REFS_HINT
         ),

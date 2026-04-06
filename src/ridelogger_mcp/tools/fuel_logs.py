@@ -21,7 +21,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_list",
         description=(
-            "List fuel logs for a vehicle (GET /api/vehicles/{vehicle_id}/fuel_logs). "
+            "[READ] List fuel logs for a vehicle (GET /api/vehicles/{vehicle_id}/fuel_logs). "
             "Requires access_token or HTTP Bearer. Optional page for pagination. "
             "Filters (passed as query params to the API, combined with AND): date_from -> `from`, date_to -> `to` (Y-m-d, inclusive bounds), "
             "currency_id, fuel_type_id. "
@@ -62,7 +62,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_create",
         description=(
-            "Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
             "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, unit_id, fuel_type_id) "
             "plus date (Y-m-d) for the vehicle log row; optional unit_price, uuid. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -108,7 +108,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_get",
         description=(
-            "Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -132,7 +132,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_update",
         description=(
-            "Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
             "Optional fields per FuelLogUpdateRequest (fuel row) plus vehicle log fields amount, currency_id, "
             "mileage, date. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -179,7 +179,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_delete",
         description=(
-            "Delete fuel log (DELETE .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete fuel log (DELETE .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer."
         ),
     )
     async def fuel_logs_delete(

@@ -14,7 +14,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_list",
         description=(
-            "List plates for a vehicle (GET /api/vehicles/{vehicle_id}/vehicle_plates). "
+            "[READ] List plates for a vehicle (GET /api/vehicles/{vehicle_id}/vehicle_plates). "
             "Requires access_token or HTTP Bearer."
         ),
     )
@@ -37,7 +37,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_create",
         description=(
-            "Create plate (POST .../vehicle_plates). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create plate (POST .../vehicle_plates). Requires access_token or HTTP Bearer. "
             "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid."
         ),
     )
@@ -73,7 +73,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_update",
         description=(
-            "Update plate (PUT .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update plate (PUT .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer. "
             "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to."
         ),
     )
@@ -108,7 +108,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_delete",
         description=(
-            "Delete plate (DELETE .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete plate (DELETE .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer."
         ),
     )
     async def vehicle_plates_delete(
