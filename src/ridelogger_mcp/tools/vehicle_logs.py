@@ -14,6 +14,7 @@ from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
     body_from_kwargs,
+    compact_query_params,
     require_token,
     tool_error,
 )
@@ -25,20 +26,33 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[READ] List all vehicle log entries for a vehicle (fuel, service, expense) — "
             "GET /api/vehicles/{vehicle_id}/vehicle_logs. Requires access_token or HTTP Bearer. "
+            "Filters (passed as query params, combined with AND): date_from -> `from`, date_to -> `to` "
+            "(Y-m-d, inclusive bounds), currency_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
     async def generic_vehicle_logs_list(
         vehicle_id: int,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        currency_id: int | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
             st = get_state()
+            params = compact_query_params(
+                {
+                    "from": date_from,
+                    "to": date_to,
+                    "currency_id": currency_id,
+                }
+            )
             data = await st.client.request_json(
                 "GET",
                 f"/vehicles/{vehicle_id}/vehicle_logs",
                 token=token,
+                params=params,
             )
             return {"ok": True, "data": data}
         except Exception as e:
