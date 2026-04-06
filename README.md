@@ -80,6 +80,9 @@ Payload envelope: `data`, `fetched_at`, `ttl_seconds`, `source_endpoint`.
 | `ridelogger://reference/vehicle_makes` | Vehicle makes |
 | `ridelogger://reference/fuel_types` | Fuel types |
 | `ridelogger://reference/fuel_units` | Fuel units |
+| `ridelogger://reference/charge_types` | Charge / charging location types |
+| `ridelogger://reference/energy_units` | Energy units (e.g. kWh) |
+| `ridelogger://reference/powertrain_types` | Vehicle powertrain (ICE, HEV, PHEV, BEV) |
 | `ridelogger://reference/service_types` | Service types |
 | `ridelogger://reference/expense_types` | Expense types |
 | `ridelogger://reference/mileage_units` | Mileage units |

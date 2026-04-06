@@ -1,0 +1,199 @@
+"""Charge log CRUD."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastmcp import FastMCP
+
+from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tools.common import (
+    LOG_REFS_HINT,
+    MONEY_LOGS_HINT,
+    body_from_kwargs,
+    compact_query_params,
+    require_token,
+    tool_error,
+)
+
+
+def register(mcp: FastMCP) -> None:
+    @mcp.tool(
+        name="charge_logs_list",
+        description=(
+            "[READ] List charge logs for a vehicle (GET /api/vehicles/{vehicle_id}/charge_logs). "
+            "Requires access_token or HTTP Bearer. Optional page for pagination. "
+            "Filters (query params, combined with AND): date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), "
+            "currency_id, charge_type_id. "
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
+        ),
+    )
+    async def charge_logs_list(
+        vehicle_id: int,
+        page: int | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        currency_id: int | None = None,
+        charge_type_id: int | None = None,
+        access_token: str | None = None,
+    ) -> dict[str, Any]:
+        try:
+            token = require_token(access_token)
+            st = get_state()
+            params = compact_query_params(
+                {
+                    "page": page,
+                    "from": date_from,
+                    "to": date_to,
+                    "currency_id": currency_id,
+                    "charge_type_id": charge_type_id,
+                }
+            )
+            data = await st.client.request_json(
+                "GET",
+                f"/vehicles/{vehicle_id}/charge_logs",
+                token=token,
+                params=params,
+            )
+            return {"ok": True, "data": data}
+        except Exception as e:
+            return tool_error(e)
+
+    @mcp.tool(
+        name="charge_logs_create",
+        description=(
+            "[WRITE] Create charge log (POST .../charge_logs). Requires access_token or HTTP Bearer. "
+            "ChargeLogStoreRequest: amount, currency_id, mileage, date (Y-m-d); provide energy (kWh) or unit_price. "
+            "Optional energy_unit_id, charge_type_id, uuid. "
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
+        ),
+    )
+    async def charge_logs_create(
+        vehicle_id: int,
+        amount: float,
+        currency_id: int,
+        mileage: int,
+        date: str,
+        energy: float | None = None,
+        unit_price: float | None = None,
+        energy_unit_id: int | None = None,
+        charge_type_id: int | None = None,
+        uuid: str | None = None,
+        access_token: str | None = None,
+    ) -> dict[str, Any]:
+        try:
+            token = require_token(access_token)
+            body = body_from_kwargs(
+                amount=amount,
+                currency_id=currency_id,
+                mileage=mileage,
+                date=date,
+                energy=energy,
+                unit_price=unit_price,
+                energy_unit_id=energy_unit_id,
+                charge_type_id=charge_type_id,
+                uuid=uuid,
+            )
+            st = get_state()
+            data = await st.client.request_json(
+                "POST",
+                f"/vehicles/{vehicle_id}/charge_logs",
+                token=token,
+                json_body=body,
+            )
+            return {"ok": True, "data": data}
+        except Exception as e:
+            return tool_error(e)
+
+    @mcp.tool(
+        name="charge_logs_get",
+        description=(
+            "[READ] Get one charge log (GET .../charge_logs/{charge_log_id}). vehicle_log id. Requires access_token. "
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
+        ),
+    )
+    async def charge_logs_get(
+        vehicle_id: int,
+        charge_log_id: int,
+        access_token: str | None = None,
+    ) -> dict[str, Any]:
+        try:
+            token = require_token(access_token)
+            st = get_state()
+            data = await st.client.request_json(
+                "GET",
+                f"/vehicles/{vehicle_id}/charge_logs/{charge_log_id}",
+                token=token,
+            )
+            return {"ok": True, "data": data}
+        except Exception as e:
+            return tool_error(e)
+
+    @mcp.tool(
+        name="charge_logs_update",
+        description=(
+            "[WRITE] Update charge log (PUT .../charge_logs/{charge_log_id}). vehicle_log id. "
+            "Optional ChargeLogUpdateRequest fields + vehicle log amount, currency_id, mileage, date. "
+            + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
+        ),
+    )
+    async def charge_logs_update(
+        vehicle_id: int,
+        charge_log_id: int,
+        amount: float | None = None,
+        currency_id: int | None = None,
+        mileage: int | None = None,
+        date: str | None = None,
+        energy: float | None = None,
+        unit_price: float | None = None,
+        energy_unit_id: int | None = None,
+        charge_type_id: int | None = None,
+        access_token: str | None = None,
+    ) -> dict[str, Any]:
+        try:
+            token = require_token(access_token)
+            body = body_from_kwargs(
+                amount=amount,
+                currency_id=currency_id,
+                mileage=mileage,
+                date=date,
+                energy=energy,
+                unit_price=unit_price,
+                energy_unit_id=energy_unit_id,
+                charge_type_id=charge_type_id,
+            )
+            if not body:
+                raise ValueError("Provide at least one field to update.")
+            st = get_state()
+            data = await st.client.request_json(
+                "PUT",
+                f"/vehicles/{vehicle_id}/charge_logs/{charge_log_id}",
+                token=token,
+                json_body=body,
+            )
+            return {"ok": True, "data": data}
+        except Exception as e:
+            return tool_error(e)
+
+    @mcp.tool(
+        name="charge_logs_delete",
+        description=(
+            "[WRITE] Delete charge log (DELETE .../charge_logs/{charge_log_id}). vehicle_log id. Requires access_token."
+        ),
+    )
+    async def charge_logs_delete(
+        vehicle_id: int,
+        charge_log_id: int,
+        access_token: str | None = None,
+    ) -> dict[str, Any]:
+        try:
+            token = require_token(access_token)
+            st = get_state()
+            data = await st.client.request_json(
+                "DELETE",
+                f"/vehicles/{vehicle_id}/charge_logs/{charge_log_id}",
+                token=token,
+            )
+            return {"ok": True, "data": data}
+        except Exception as e:
+            return tool_error(e)

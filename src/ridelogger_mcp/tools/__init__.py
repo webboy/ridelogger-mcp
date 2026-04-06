@@ -6,6 +6,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.tools import (
     auth,
+    charge_logs,
     expense_logs,
     fuel_logs,
     images,
@@ -23,6 +24,7 @@ def register_all(mcp: FastMCP) -> None:
     plates.register(mcp)
     images.register(mcp)
     fuel_logs.register(mcp)
+    charge_logs.register(mcp)
     service_logs.register(mcp)
     expense_logs.register(mcp)
     vehicle_logs.register(mcp)

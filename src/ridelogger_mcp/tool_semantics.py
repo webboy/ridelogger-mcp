@@ -9,7 +9,7 @@ import json
 from typing import Any
 
 # Bump when the policy envelope or meaning of fields changes.
-POLICY_CONTRACT_VERSION = "2026-03-26.2"
+POLICY_CONTRACT_VERSION = "2026-04-06.1"
 POLICY_RESOURCE_URI = "ridelogger://policy/tool-semantics"
 
 # Keep in sync with every @mcp.tool name in tools/*.py (auth_login included for Cursor; app excludes it in client).
@@ -34,6 +34,11 @@ REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
         "fuel_logs_get",
         "fuel_logs_update",
         "fuel_logs_delete",
+        "charge_logs_list",
+        "charge_logs_create",
+        "charge_logs_get",
+        "charge_logs_update",
+        "charge_logs_delete",
         "service_logs_list",
         "service_logs_create",
         "service_logs_get",
@@ -142,6 +147,12 @@ TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
     "fuel_logs_create": _write("vehicle_log", confirmation="recommended", requires=["vehicle_id"], provides=["fuel_log"]),
     "fuel_logs_update": _write("vehicle_log", confirmation="recommended", requires=["vehicle_id", "log_id"], provides=["fuel_log"]),
     "fuel_logs_delete": _write("vehicle_log", confirmation="required", risk="high", requires=["vehicle_id", "log_id"]),
+    # Charge
+    "charge_logs_list": _read("vehicle_log", requires=["vehicle_id"], provides=["charge_logs"]),
+    "charge_logs_get": _read("vehicle_log", requires=["vehicle_id", "log_id"], provides=["charge_log"]),
+    "charge_logs_create": _write("vehicle_log", confirmation="recommended", requires=["vehicle_id"], provides=["charge_log"]),
+    "charge_logs_update": _write("vehicle_log", confirmation="recommended", requires=["vehicle_id", "log_id"], provides=["charge_log"]),
+    "charge_logs_delete": _write("vehicle_log", confirmation="required", risk="high", requires=["vehicle_id", "log_id"]),
     # Service
     "service_logs_list": _read("vehicle_log", requires=["vehicle_id"], provides=["service_logs"]),
     "service_logs_get": _read("vehicle_log", requires=["vehicle_id", "log_id"], provides=["service_log"]),

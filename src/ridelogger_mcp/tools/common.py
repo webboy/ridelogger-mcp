@@ -26,8 +26,8 @@ VEHICLE_REFS_HINT = (
 # Embedded reference objects in log responses (API v1.3+).
 LOG_REFS_HINT = (
     "Each log row includes resolved reference objects alongside raw IDs: "
-    "fuel_type {id,name} (fuel logs), service_type {id,name} (service logs), "
-    "expense_type {id,name} (expense logs), unit_label (fuel unit name string), "
+    "fuel_type {id,name} (fuel logs), charge_type {id,name} (charge logs), service_type {id,name} (service logs), "
+    "expense_type {id,name} (expense logs), unit_label (fuel unit name string), energy_unit_label (charge logs), "
     "currency_info {id,code,name,symbol}. Null when the field does not apply to the log type."
 )
 from ridelogger_mcp.errors import UpstreamApiError
