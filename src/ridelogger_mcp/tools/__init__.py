@@ -12,6 +12,7 @@ from ridelogger_mcp.tools import (
     images,
     plates,
     reference,
+    reminders,
     service_logs,
     vehicle_logs,
     vehicles,
@@ -29,3 +30,4 @@ def register_all(mcp: FastMCP) -> None:
     expense_logs.register(mcp)
     vehicle_logs.register(mcp)
     reference.register(mcp)
+    reminders.register(mcp)

@@ -9,7 +9,7 @@ import json
 from typing import Any
 
 # Bump when the policy envelope or meaning of fields changes.
-POLICY_CONTRACT_VERSION = "2026-04-06.1"
+POLICY_CONTRACT_VERSION = "2026-04-07.1"
 POLICY_RESOURCE_URI = "ridelogger://policy/tool-semantics"
 
 # Keep in sync with every @mcp.tool name in tools/*.py (auth_login included for Cursor; app excludes it in client).
@@ -57,6 +57,14 @@ REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
         "vehicle_log_files_delete",
         "vehicle_log_files_download",
         "reference_data_refresh",
+        "reminder_slots_list",
+        "reminder_list",
+        "reminder_list_user",
+        "reminder_show",
+        "reminder_create",
+        "reminder_update",
+        "reminder_delete",
+        "reminder_complete",
     }
 )
 
@@ -173,6 +181,15 @@ TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
     "vehicle_log_files_upload": _write("vehicle_log", confirmation="recommended", requires=["vehicle_id", "vehicle_log_id"], provides=["vehicle_log_file"]),
     "vehicle_log_files_upload_base64": _write("vehicle_log", confirmation="recommended", requires=["vehicle_id", "vehicle_log_id"], provides=["vehicle_log_file"]),
     "vehicle_log_files_delete": _write("vehicle_log", confirmation="required", risk="high", requires=["vehicle_id", "vehicle_log_id", "file_id"]),
+    # Reminders
+    "reminder_slots_list": _read("session", provides=["reminder_slots"]),
+    "reminder_list": _read("vehicle", requires=["vehicle_id"], provides=["reminders"]),
+    "reminder_list_user": _read("account", provides=["reminders"]),
+    "reminder_show": _read("vehicle", requires=["vehicle_id", "reminder_id"], provides=["reminder"]),
+    "reminder_create": _write("vehicle", confirmation="recommended", requires=["vehicle_id"], provides=["reminder"]),
+    "reminder_update": _write("vehicle", confirmation="recommended", requires=["vehicle_id", "reminder_id"], provides=["reminder"]),
+    "reminder_delete": _write("vehicle", confirmation="required", risk="high", requires=["vehicle_id", "reminder_id"]),
+    "reminder_complete": _write("vehicle", confirmation="recommended", requires=["vehicle_id", "reminder_id"], provides=["reminder"]),
 }
 
 
