@@ -109,7 +109,11 @@ def register(mcp: FastMCP) -> None:
         name="reminder_create",
         description=(
             "[WRITE] Create reminder (POST /api/vehicles/{vehicle_id}/reminders). "
-            "Slot-based: reminder_slot_id 1–5, name auto. Custom (premium): omit reminder_slot_id and set name. "
+            "Built-in slots (reminder_slot_id): 1=Technical inspection, 2=Oil change, "
+            "3=Tire swap (summer), 4=Tire swap (winter), 5=Brake check. "
+            "ALWAYS use a matching slot when the user's request fits one of these 5 categories — "
+            "free users can only create slot-based reminders (up to 3 active per vehicle). "
+            "Custom reminders (omit reminder_slot_id, set name) require Premium. "
             "alarm_type_id: 1=DATE, 2=MILEAGE, 3=ANY. target_date / target_mileage per type. "
             "Optional interval_* for recurring."
         ),
