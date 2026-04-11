@@ -129,23 +129,29 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_update",
         description=(
-            "[WRITE] Update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
-            "Body matches VehicleUpdateRequest (same fields as create in API). Send all required fields. "
-            "Response includes the updated vehicle. " + VEHICLE_REFS_HINT
+            "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
+            "Only **vehicle_id** is required; include **only fields that change** (API merges with existing row). "
+            "Omitted parameters are not sent. For **cars** (vehicle_type_id=1), set **vehicle_make_id** and "
+            "**vehicle_model_id** from reference data when you change identity; omit **vehicle_model_id** for "
+            "motorcycles/trucks. Do not send null for unknown IDs — omit the key instead. "
+            "Optional: powertrain_id, plate, valid_to, country_id (with plate), engine_*. "
+            + VEHICLE_REFS_HINT
         ),
     )
     async def vehicles_update(
         vehicle_id: int,
-        vehicle_type_id: int,
-        vehicle_make_id: int,
-        mileage: int,
-        mileage_unit_id: int,
-        fuel_type_id: int,
-        label: str,
-        production_year: int,
+        vehicle_type_id: int | None = None,
+        vehicle_make_id: int | None = None,
         vehicle_model_id: int | None = None,
+        mileage: int | None = None,
+        mileage_unit_id: int | None = None,
+        fuel_type_id: int | None = None,
+        label: str | None = None,
+        production_year: int | None = None,
+        powertrain_id: int | None = None,
         plate: str | None = None,
         valid_to: str | None = None,
+        country_id: int | None = None,
         engine_displacement: int | None = None,
         engine_power_kw: int | None = None,
         engine_power_hp: int | None = None,
@@ -162,8 +168,10 @@ def register(mcp: FastMCP) -> None:
                 fuel_type_id=fuel_type_id,
                 label=label,
                 production_year=production_year,
+                powertrain_id=powertrain_id,
                 plate=plate,
                 valid_to=valid_to,
+                country_id=country_id,
                 engine_displacement=engine_displacement,
                 engine_power_kw=engine_power_kw,
                 engine_power_hp=engine_power_hp,

@@ -122,7 +122,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `vehicles_list` | yes | GET `/api/vehicles` (optional `page`). |
 | `vehicles_create` | yes | POST `/api/vehicles` — typed fields (VehicleStoreRequest). |
 | `vehicles_get` | yes | GET `/api/vehicles/{id}`. |
-| `vehicles_update` | yes | PUT `/api/vehicles/{id}` — typed fields (VehicleUpdateRequest). |
+| `vehicles_update` | yes | PUT `/api/vehicles/{id}` — **partial** body (VehicleUpdateRequest); only `vehicle_id` required in the tool; omit unused fields. |
 
 **Plate history**
 

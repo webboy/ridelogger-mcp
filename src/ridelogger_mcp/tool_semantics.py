@@ -9,7 +9,7 @@ import json
 from typing import Any
 
 # Bump when the policy envelope or meaning of fields changes.
-POLICY_CONTRACT_VERSION = "2026-04-07.1"
+POLICY_CONTRACT_VERSION = "2026-04-11.1"
 POLICY_RESOURCE_URI = "ridelogger://policy/tool-semantics"
 
 # Keep in sync with every @mcp.tool name in tools/*.py (auth_login included for Cursor; app excludes it in client).
