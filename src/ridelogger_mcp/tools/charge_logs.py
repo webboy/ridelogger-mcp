@@ -65,7 +65,7 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Create charge log (POST .../charge_logs). Requires access_token or HTTP Bearer. "
             "ChargeLogStoreRequest: amount, currency_id, mileage, date (Y-m-d); provide energy (kWh) or unit_price. "
             "Optional energy_unit_id, charge_type_id, uuid. "
-            "Optional geolocation: business_name, business_address, latitude, longitude. "
+            "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -84,6 +84,7 @@ def register(mcp: FastMCP) -> None:
         business_address: str | None = None,
         latitude: float | None = None,
         longitude: float | None = None,
+        rating: int | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
@@ -102,6 +103,7 @@ def register(mcp: FastMCP) -> None:
                 business_address=business_address,
                 latitude=latitude,
                 longitude=longitude,
+                rating=rating,
             )
             st = get_state()
             data = await st.client.request_json(
@@ -143,7 +145,7 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Update charge log (PUT .../charge_logs/{charge_log_id}). vehicle_log id. "
             "Optional ChargeLogUpdateRequest fields + vehicle log amount, currency_id, mileage, date. "
-            "Optional geolocation: business_name, business_address, latitude, longitude. "
+            "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -162,6 +164,7 @@ def register(mcp: FastMCP) -> None:
         business_address: str | None = None,
         latitude: float | None = None,
         longitude: float | None = None,
+        rating: int | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
@@ -179,6 +182,7 @@ def register(mcp: FastMCP) -> None:
                 business_address=business_address,
                 latitude=latitude,
                 longitude=longitude,
+                rating=rating,
             )
             if not body:
                 raise ValueError("Provide at least one field to update.")
