@@ -6,10 +6,13 @@ Contract version is bumped when JSON shape or required fields change.
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from fastmcp.tools.tool import ToolAnnotations
 
 # Bump when the policy envelope or meaning of fields changes.
-POLICY_CONTRACT_VERSION = "2026-04-11.1"
+POLICY_CONTRACT_VERSION = "2026-04-23.1"
 POLICY_RESOURCE_URI = "ridelogger://policy/tool-semantics"
 
 # Keep in sync with every @mcp.tool name in tools/*.py (auth_login included for Cursor; app excludes it in client).
@@ -17,6 +20,7 @@ REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
     {
         "auth_login",
         "auth_me",
+        "user_avatar_upload",
         "vehicles_list",
         "vehicles_create",
         "vehicles_get",
@@ -119,7 +123,7 @@ TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
     "auth_login": {
         "kind": "mcp",
         "category": "acquisition",
-        "mutation": False,
+        "mutation": True,
         "confirmation": "none",
         "risk": "medium",
         "risk_level": "medium",
@@ -129,6 +133,7 @@ TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
         "provides": ["access_token"],
     },
     "auth_me": _read("account", risk="low", provides=["user_profile", "preferred_currency_id"]),
+    "user_avatar_upload": _write("account", confirmation="recommended", requires=["file"], provides=["user_profile"]),
     "reference_data_refresh": _read(
         "session",
         idem="unknown",
@@ -193,6 +198,33 @@ TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
 }
 
 
+def build_annotations(semantics: dict[str, Any]) -> "ToolAnnotations":
+    """Convert a TOOL_SEMANTICS entry into a FastMCP ToolAnnotations instance.
+
+    Mapping rules:
+    - readOnlyHint=True  when mutation=False (no server-side user data changes)
+    - destructiveHint=True when risk="high" (irreversible deletes)
+    - idempotentHint=True when idempotency="idempotent" (read-only tools)
+    - openWorldHint=False for all — RideLogger tools operate on bounded user data only
+    """
+    from fastmcp.tools.tool import ToolAnnotations
+
+    return ToolAnnotations(
+        readOnlyHint=not semantics.get("mutation", False),
+        destructiveHint=semantics.get("risk", "low") == "high",
+        idempotentHint=semantics.get("idempotency", "non_idempotent") == "idempotent",
+        openWorldHint=False,
+    )
+
+
+def get_annotations(tool_name: str) -> "ToolAnnotations":
+    """Return FastMCP ToolAnnotations for a registered tool. Fails fast if unknown."""
+    try:
+        return build_annotations(TOOL_SEMANTICS[tool_name])
+    except KeyError:
+        raise KeyError(f"No TOOL_SEMANTICS entry for tool '{tool_name}'. Add it before registering.")
+
+
 def validate_registry() -> None:
     """Assert every registered MCP tool has semantics; fail fast in tests / CI."""
     missing = REGISTERED_TOOL_NAMES - set(TOOL_SEMANTICS)
@@ -224,6 +256,8 @@ __all__ = [
     "POLICY_RESOURCE_URI",
     "REGISTERED_TOOL_NAMES",
     "TOOL_SEMANTICS",
+    "build_annotations",
+    "get_annotations",
     "policy_resource_json",
     "validate_registry",
 ]

@@ -10,12 +10,14 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_list",
+        annotations=get_annotations("vehicle_images_list"),
         description=(
             "[READ] List gallery images for a vehicle (GET /api/vehicles/{vehicle_id}/images). "
             "Requires access_token or HTTP Bearer."
@@ -39,6 +41,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_images_get",
+        annotations=get_annotations("vehicle_images_get"),
         description=(
             "[READ] Download one gallery image (GET /api/vehicles/{vehicle_id}/images/{image_id}). "
             "Requires access_token or HTTP Bearer. Returns JSON with base64, content_type, filename_hint."
@@ -76,6 +79,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_images_create",
+        annotations=get_annotations("vehicle_images_create"),
         description=(
             "[WRITE] Upload a gallery image (POST /api/vehicles/{vehicle_id}/images). "
             "Requires access_token or HTTP Bearer. "
@@ -130,6 +134,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_images_delete",
+        annotations=get_annotations("vehicle_images_delete"),
         description=(
             "[WRITE] Delete gallery image (DELETE .../images/{image_id}). Requires access_token or HTTP Bearer."
         ),

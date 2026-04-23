@@ -10,12 +10,14 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="user_avatar_upload",
+        annotations=get_annotations("user_avatar_upload"),
         description=(
             "[WRITE] Upload or replace the authenticated user's profile avatar "
             "(POST /api/avatar). "

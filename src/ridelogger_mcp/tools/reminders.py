@@ -7,12 +7,14 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import body_from_kwargs, compact_query_params, require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_slots_list",
+        annotations=get_annotations("reminder_slots_list"),
         description=(
             "[READ] List built-in reminder slots (GET /api/reminder_slots). "
             "Public reference data: slug, default alarm type, default intervals."
@@ -35,6 +37,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_list",
+        annotations=get_annotations("reminder_list"),
         description=(
             "[READ] List reminders for a vehicle (GET /api/vehicles/{vehicle_id}/reminders). "
             "Optional status: comma-separated active,passed,canceled,completed. Requires access_token."
@@ -61,6 +64,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_list_user",
+        annotations=get_annotations("reminder_list_user"),
         description=(
             "[READ] List reminders for the authenticated user across vehicles "
             "(GET /api/user/reminders). Optional status filter."
@@ -86,6 +90,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_show",
+        annotations=get_annotations("reminder_show"),
         description="[READ] Get one reminder (GET /api/vehicles/{vehicle_id}/reminders/{reminder_id}).",
     )
     async def reminder_show(
@@ -107,6 +112,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_create",
+        annotations=get_annotations("reminder_create"),
         description=(
             "[WRITE] Create reminder (POST /api/vehicles/{vehicle_id}/reminders). "
             "Built-in slots (reminder_slot_id): 1=Technical inspection, 2=Oil change, "
@@ -157,6 +163,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_update",
+        annotations=get_annotations("reminder_update"),
         description=(
             "[WRITE] Update custom reminder name/description only "
             "(PUT /api/vehicles/{vehicle_id}/reminders/{reminder_id}). Premium custom reminders."
@@ -185,6 +192,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_delete",
+        annotations=get_annotations("reminder_delete"),
         description="[WRITE] Delete reminder (DELETE .../reminders/{reminder_id}). Confirmation recommended.",
     )
     async def reminder_delete(
@@ -206,6 +214,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="reminder_complete",
+        annotations=get_annotations("reminder_complete"),
         description=(
             "[WRITE] Mark reminder complete; recurring creates next (POST .../reminders/{reminder_id}/complete)."
         ),

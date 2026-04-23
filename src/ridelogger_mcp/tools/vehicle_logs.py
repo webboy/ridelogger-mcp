@@ -10,6 +10,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
@@ -23,6 +24,7 @@ from ridelogger_mcp.tools.common import (
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_list",
+        annotations=get_annotations("generic_vehicle_logs_list"),
         description=(
             "[READ] List all vehicle log entries for a vehicle (fuel, service, expense) — "
             "GET /api/vehicles/{vehicle_id}/vehicle_logs. Requires access_token or HTTP Bearer. "
@@ -60,6 +62,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="generic_vehicle_logs_delete",
+        annotations=get_annotations("generic_vehicle_logs_delete"),
         description=(
             "[WRITE] Delete a generic vehicle log row (DELETE /api/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}). "
             "Requires access_token or HTTP Bearer. Returns 202 on success."
@@ -84,6 +87,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_log_files_list",
+        annotations=get_annotations("vehicle_log_files_list"),
         description=(
             "[READ] List file attachments on a vehicle log (GET .../vehicle_logs/{vehicle_log_id}/get_files). "
             "Requires access_token or HTTP Bearer."
@@ -108,6 +112,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_log_files_upload",
+        annotations=get_annotations("vehicle_log_files_upload"),
         description=(
             "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
             "Requires access_token or HTTP Bearer. Exactly one of: chat_upload_id (AI chat attachment UUID), "
@@ -163,6 +168,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_log_files_upload_base64",
+        annotations=get_annotations("vehicle_log_files_upload_base64"),
         description=(
             "[WRITE] Upload attachment via JSON body (POST .../put_files_cordova). "
             "Requires access_token or HTTP Bearer. "
@@ -206,6 +212,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_log_files_delete",
+        annotations=get_annotations("vehicle_log_files_delete"),
         description=(
             "[WRITE] Delete one attachment by media uuid (DELETE .../delete_files/{uuid}). Requires access_token or HTTP Bearer."
         ),
@@ -230,6 +237,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_log_files_download",
+        annotations=get_annotations("vehicle_log_files_download"),
         description=(
             "[READ] Download attachment bytes as base64 (GET .../download_files/{uuid}). Requires access_token or HTTP Bearer."
         ),

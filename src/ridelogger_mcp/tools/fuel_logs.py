@@ -7,6 +7,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
@@ -20,6 +21,7 @@ from ridelogger_mcp.tools.common import (
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_list",
+        annotations=get_annotations("fuel_logs_list"),
         description=(
             "[READ] List fuel logs for a vehicle (GET /api/vehicles/{vehicle_id}/fuel_logs). "
             "Requires access_token or HTTP Bearer. Optional page for pagination. "
@@ -61,6 +63,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="fuel_logs_create",
+        annotations=get_annotations("fuel_logs_create"),
         description=(
             "[WRITE] Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
             "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, unit_id, fuel_type_id) "
@@ -118,6 +121,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="fuel_logs_get",
+        annotations=get_annotations("fuel_logs_get"),
         description=(
             "[READ] Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -142,6 +146,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="fuel_logs_update",
+        annotations=get_annotations("fuel_logs_update"),
         description=(
             "[WRITE] Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
             "Optional fields per FuelLogUpdateRequest (fuel row) plus vehicle log fields amount, currency_id, "
@@ -200,6 +205,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="fuel_logs_delete",
+        annotations=get_annotations("fuel_logs_delete"),
         description=(
             "[WRITE] Delete fuel log (DELETE .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer."
         ),

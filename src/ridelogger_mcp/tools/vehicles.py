@@ -7,12 +7,14 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import VEHICLE_REFS_HINT, body_from_kwargs, require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_list",
+        annotations=get_annotations("vehicles_list"),
         description=(
             "[READ] List vehicles the user can manage (GET /api/vehicles). "
             "Requires access_token or HTTP Bearer. "
@@ -53,6 +55,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicles_create",
+        annotations=get_annotations("vehicles_create"),
         description=(
             "[WRITE] Create a vehicle (POST /api/vehicles). Requires access_token or HTTP Bearer. "
             "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
@@ -108,6 +111,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicles_get",
+        annotations=get_annotations("vehicles_get"),
         description=(
             "[READ] Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
             + VEHICLE_REFS_HINT
@@ -128,6 +132,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicles_update",
+        annotations=get_annotations("vehicles_update"),
         description=(
             "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
             "Only **vehicle_id** is required; include **only fields that change** (API merges with existing row). "

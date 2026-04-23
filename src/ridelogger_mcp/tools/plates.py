@@ -7,12 +7,14 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_list",
+        annotations=get_annotations("vehicle_plates_list"),
         description=(
             "[READ] List plates for a vehicle (GET /api/vehicles/{vehicle_id}/vehicle_plates). "
             "Requires access_token or HTTP Bearer."
@@ -36,6 +38,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_plates_create",
+        annotations=get_annotations("vehicle_plates_create"),
         description=(
             "[WRITE] Create plate (POST .../vehicle_plates). Requires access_token or HTTP Bearer. "
             "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid."
@@ -72,6 +75,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_plates_update",
+        annotations=get_annotations("vehicle_plates_update"),
         description=(
             "[WRITE] Update plate (PUT .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer. "
             "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to."
@@ -107,6 +111,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="vehicle_plates_delete",
+        annotations=get_annotations("vehicle_plates_delete"),
         description=(
             "[WRITE] Delete plate (DELETE .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer."
         ),

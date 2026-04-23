@@ -8,12 +8,14 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.logging_setup import new_request_id
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import require_token, tool_error
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="auth_login",
+        annotations=get_annotations("auth_login"),
         description=(
             "Authenticate with email and password against RideLogger API. "
             "Does NOT require access_token. "
@@ -45,6 +47,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="auth_me",
+        annotations=get_annotations("auth_me"),
         description=(
             "[READ] Current user profile and account settings (GET /api/auth/me). "
             "Requires access_token or HTTP Authorization: Bearer. "

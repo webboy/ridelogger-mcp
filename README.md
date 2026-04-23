@@ -202,3 +202,27 @@ Create/update tools expose **explicit parameters**; shapes match **ridelogger-ap
 - Only `auth_login` and `reference_data_refresh` omit `access_token`; other tools require a non-empty token and fail fast if missing (unless Bearer is set on the HTTP request).
 - Tokens are never logged.
 - Upstream errors are mapped to structured `UpstreamApiError` messages (401/403/404/422/429/5xx hints).
+
+## Tool safety semantics (ChatGPT app / MCP clients)
+
+Every tool has explicit FastMCP `annotations` derived from the single source of truth in `tool_semantics.py`:
+
+| Annotation | Rule |
+|---|---|
+| `readOnlyHint=True` | Tool has `mutation=False` — reads only, no server-side user data changes |
+| `destructiveHint=True` | Tool has `risk="high"` — irreversible delete operation |
+| `idempotentHint=True` | Tool has `idempotency="idempotent"` — safe to repeat with same arguments |
+| `openWorldHint=False` | All tools — operate only on the authenticated user's bounded vehicle data |
+
+**Read tools (22):** `auth_me`, `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`, `reference_data_refresh`
+
+**Destructive delete tools (11, `destructiveHint=True`):** `fuel/charge/service/expense_logs_delete`, `generic_vehicle_logs_delete`, `vehicle_log_files_delete`, `vehicle_images_delete`, `vehicle_plates_delete`, `reminder_delete`
+
+**Write non-destructive (17):** all `_create`, `_update`, `_upload*`, `reminder_complete`, `user_avatar_upload`, `auth_login`, `vehicles_create/update`
+
+### Adding a new tool
+
+1. Add an entry to `TOOL_SEMANTICS` in `tool_semantics.py` (use `_read()` or `_write()` helpers).
+2. Add the name to `REGISTERED_TOOL_NAMES`.
+3. Add `annotations=get_annotations("tool_name")` to the `@mcp.tool()` decorator.
+4. Run `pytest tests/test_tool_annotations.py` — it will fail if step 1 or 2 is missing.

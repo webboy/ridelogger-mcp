@@ -7,6 +7,7 @@ from typing import Any
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
+from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
@@ -20,6 +21,7 @@ from ridelogger_mcp.tools.common import (
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_list",
+        annotations=get_annotations("expense_logs_list"),
         description=(
             "[READ] List expense logs for a vehicle (GET /api/vehicles/{vehicle_id}/expense_logs). "
             "Requires access_token or HTTP Bearer. Optional page. "
@@ -60,6 +62,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="expense_logs_create",
+        annotations=get_annotations("expense_logs_create"),
         description=(
             "[WRITE] Create expense log (POST .../expense_logs). Requires access_token or HTTP Bearer. "
             "ExpenseLogStoreRequest: amount, currency_id, mileage, expense_type_id, title; "
@@ -115,6 +118,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="expense_logs_get",
+        annotations=get_annotations("expense_logs_get"),
         description=(
             "[READ] Get one expense log (GET .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -139,6 +143,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="expense_logs_update",
+        annotations=get_annotations("expense_logs_update"),
         description=(
             "[WRITE] Update expense log (PUT .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
             "Optional: amount, currency_id, mileage, expense_type_id (ExpenseLogUpdateRequest); "
@@ -195,6 +200,7 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(
         name="expense_logs_delete",
+        annotations=get_annotations("expense_logs_delete"),
         description=(
             "[WRITE] Delete expense log (DELETE .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer."
         ),
