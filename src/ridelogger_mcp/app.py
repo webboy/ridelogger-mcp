@@ -8,7 +8,7 @@ import logging
 from fastmcp import FastMCP
 from fastmcp.server.lifespan import lifespan
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, PlainTextResponse, Response
 
 from ridelogger_mcp import __version__
 from ridelogger_mcp.api_client import ApiClient
@@ -106,6 +106,22 @@ async def health_check(_request: Request) -> JSONResponse:
             },
         },
     )
+
+
+@mcp.custom_route("/.well-known/openai-apps-challenge", methods=["GET"])
+async def openai_apps_challenge(_request: Request) -> Response:
+    """Serve the OpenAI Apps domain-verification token as plain text.
+
+    The token is copied from OpenAI Platform dashboard (MCP Server →
+    Domain verification → Token) into the server `.env` as
+    `OPENAI_APPS_CHALLENGE_TOKEN`. When unset, return 404 so the
+    endpoint does not leak an empty placeholder.
+    """
+    settings = Settings()
+    token = (settings.openai_apps_challenge_token or "").strip()
+    if not token:
+        return PlainTextResponse("Not Found", status_code=404)
+    return PlainTextResponse(token, media_type="text/plain; charset=utf-8")
 
 
 @mcp.custom_route("/.well-known/oauth-protected-resource", methods=["GET"])

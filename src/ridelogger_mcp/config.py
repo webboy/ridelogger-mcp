@@ -34,12 +34,21 @@ class Settings(BaseSettings):
     api_consumer_secret: str = Field(default="", validation_alias="API_CONSUMER_SECRET")
 
     oauth_authorization_server: str = Field(
-        default="https://api.servisna-knjizica.com",
+        default="https://api.ridelogger.com",
         validation_alias="OAUTH_AUTHORIZATION_SERVER",
     )
     oauth_resource_url: str = Field(
-        default="https://mcp.servisna-knjizica.com/mcp",
+        default="https://mcp.ridelogger.com/mcp",
         validation_alias="OAUTH_RESOURCE_URL",
+    )
+
+    # Token served at /.well-known/openai-apps-challenge for OpenAI Apps
+    # domain verification. Copy the value from OpenAI Platform dashboard
+    # (MCP Server → Domain verification → Token) into the server .env and
+    # restart. Empty = endpoint returns 404.
+    openai_apps_challenge_token: str = Field(
+        default="",
+        validation_alias="OPENAI_APPS_CHALLENGE_TOKEN",
     )
 
     host: str = Field(default="0.0.0.0", validation_alias="MCP_HOST")

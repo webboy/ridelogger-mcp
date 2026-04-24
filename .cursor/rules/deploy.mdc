@@ -11,14 +11,26 @@ alwaysApply: true
 - **Host**: 159.89.22.200
 - **App path**: `/var/www/ridelogger-mcp` (git checkout, venv, `.env`)
 - **systemd**: `ridelogger-mcp.service` — pokreće `python -m ridelogger_mcp` kao `www-data`, sluša **`127.0.0.1:8083`**
-- **Apache**: reverse proxy za `mcp.servisna-knjizica.com` → `http://127.0.0.1:8083/` (TLS preko Certbot-a; HTTP → HTTPS redirect)
-- **Javni URL**: `https://mcp.servisna-knjizica.com` — health `GET /health`, MCP streamable HTTP npr. **`https://mcp.servisna-knjizica.com/mcp`**
+- **Apache**: reverse proxy za **`mcp.ridelogger.com`** (primarni) i `mcp.servisna-knjizica.com` (legacy alias) → `http://127.0.0.1:8083/` (TLS preko Certbot-a; HTTP → HTTPS redirect)
+- **Javni URL (primarni)**: `https://mcp.ridelogger.com` — health `GET /health`, MCP streamable HTTP **`https://mcp.ridelogger.com/mcp`**
+- **Legacy URL**: `https://mcp.servisna-knjizica.com/mcp` i dalje radi na istom backend-u (za postojeće MCP klijente)
 
 Port **8083** nije izložen javno; samo loopback + Apache.
 
 ## Konfiguracija na serveru
 
-- **`/var/www/ridelogger-mcp/.env`** (ne commitovati): npr. `SK_API_URL=https://api.servisna-knjizica.com`, `MCP_HOST=127.0.0.1`, `MCP_PORT=8083`
+- **`/var/www/ridelogger-mcp/.env`** (ne commitovati), primarni ridelogger.com setup:
+  ```
+  SK_API_URL=https://api.ridelogger.com
+  OAUTH_AUTHORIZATION_SERVER=https://api.ridelogger.com
+  OAUTH_RESOURCE_URL=https://mcp.ridelogger.com/mcp
+  OPENAI_APPS_CHALLENGE_TOKEN=<OpenAI Platform → MCP Server → Domain verification → Token>
+  MCP_HOST=127.0.0.1
+  MCP_PORT=8083
+  API_CONSUMER_CODE=mcp
+  API_CONSUMER_KEY_ID=<k_... iz api_consumers tabele>
+  API_CONSUMER_SECRET=<secret iz api_consumers tabele>
+  ```
 - Isti fajl koristi **systemd** (`EnvironmentFile=-/var/www/ridelogger-mcp/.env`)
 
 ## Ažuriranje posle izmene koda (tipičan deploy)
@@ -36,13 +48,14 @@ systemctl restart ridelogger-mcp
 Provera:
 
 ```bash
-curl -fsS https://mcp.servisna-knjizica.com/health
+curl -fsS https://mcp.ridelogger.com/health
+curl -fsS https://mcp.ridelogger.com/.well-known/oauth-protected-resource | jq .
 journalctl -u ridelogger-mcp -n 50 --no-pager
 ```
 
 ## Apache / TLS
 
-- Vhost fajlovi: npr. `/etc/apache2/sites-available/mcp.servisna-knjizica.com.conf` (HTTP) i `mcp.servisna-knjizica.com-le-ssl.conf` (HTTPS, Certbot).
+- Vhost fajlovi: `/etc/apache2/sites-available/mcp.ridelogger.com.conf` (HTTP) + `mcp.ridelogger.com-le-ssl.conf` (HTTPS, Certbot). Legacy aliasi za `mcp.servisna-knjizica.com` postoje pored njih.
 - Posle ručne izmene Apache konfiguracije: `apache2ctl configtest && systemctl reload apache2`.
 - Sertifikat: obnavlja **certbot** (`certbot renew` / systemd timer); nije potrebno ručno osim debug-a.
 
