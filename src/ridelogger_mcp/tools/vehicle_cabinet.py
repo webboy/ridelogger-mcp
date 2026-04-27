@@ -109,7 +109,7 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Upload a cabinet document (POST /api/vehicles/{vehicle_id}/cabinet-documents). "
             "Multipart: title, document_category, optional description/issued_at/expires_at, cabinet_file. "
-            "Provide file_base64 + file_name, or file_path on the MCP host."
+            "Provide exactly one file source: chat_upload_id, file_base64 + file_name, or file_path on the MCP host."
         ),
     )
     async def vehicle_cabinet_create(
@@ -119,6 +119,7 @@ def register(mcp: FastMCP) -> None:
         description: str | None = None,
         issued_at: str | None = None,
         expires_at: str | None = None,
+        chat_upload_id: str | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
         file_path: str | None = None,
@@ -127,7 +128,15 @@ def register(mcp: FastMCP) -> None:
         try:
             token = require_token(access_token)
             st = get_state()
-            if file_path:
+            has_binary_source = bool(file_path or file_base64)
+            if chat_upload_id and has_binary_source:
+                raise ValueError("Use either chat_upload_id or file upload fields, not both.")
+
+            files = None
+            if chat_upload_id:
+                fname = None
+                raw = None
+            elif file_path:
                 with open(file_path, "rb") as f:
                     raw = f.read()
                 fname = file_name or file_path.rsplit("/", maxsplit=1)[-1]
@@ -135,12 +144,15 @@ def register(mcp: FastMCP) -> None:
                 raw = base64.b64decode(file_base64)
                 fname = file_name
             else:
-                raise ValueError("Provide file_base64+file_name, or file_path.")
-            files = {"cabinet_file": (fname, io.BytesIO(raw), "application/octet-stream")}
+                raise ValueError("Provide chat_upload_id, file_base64+file_name, or file_path.")
+            if raw is not None and fname is not None:
+                files = {"cabinet_file": (fname, io.BytesIO(raw), "application/octet-stream")}
             data: dict[str, Any] = {
                 "title": title,
                 "document_category": document_category,
             }
+            if chat_upload_id:
+                data["chat_upload_id"] = chat_upload_id.strip()
             if description:
                 data["description"] = description
             if issued_at:
