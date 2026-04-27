@@ -15,6 +15,7 @@ from ridelogger_mcp.tools import (
     reminders,
     service_logs,
     user,
+    vehicle_cabinet,
     vehicle_logs,
     vehicles,
 )
@@ -26,6 +27,7 @@ def register_all(mcp: FastMCP) -> None:
     vehicles.register(mcp)
     plates.register(mcp)
     images.register(mcp)
+    vehicle_cabinet.register(mcp)
     fuel_logs.register(mcp)
     charge_logs.register(mcp)
     service_logs.register(mcp)
