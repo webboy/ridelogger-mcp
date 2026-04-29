@@ -2,6 +2,8 @@
 
 HTTP [MCP](https://modelcontextprotocol.io/) server ([FastMCP](https://gofastmcp.com/)) — thin wrapper around the **RideLogger API** (`ridelogger-api`). It exposes cached reference data as **resources** and **tools** for auth plus vehicle / log / file CRUD.
 
+**RAG:** Semantic retrieval lives in the internal **`ridelogger-rag`** service and is used from **`ridelogger-ai`** (not from this MCP). This MCP stays the source of **structured** API-backed tools; exact log rows and costs always come from tools here, not from embeddings.
+
 ## Configuration
 
 | Variable | Required | Description |
