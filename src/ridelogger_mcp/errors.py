@@ -52,7 +52,7 @@ def raise_for_status(resp: httpx.Response) -> None:
         msg = resp.reason_phrase or f"HTTP {resp.status_code}"
     hint = ""
     if resp.status_code == 401:
-        hint = " Token may be expired or invalid; call auth_login again."
+        hint = " Token may be expired or invalid; reconnect or reauthorize the MCP client."
     elif resp.status_code == 402:
         hint = " Premium plan required for this action."
     elif resp.status_code == 403:

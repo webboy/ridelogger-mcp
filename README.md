@@ -57,7 +57,7 @@ Service `sk-mcp` uses `SK_API_URL=http://sk-api:8082` and maps port **8083**.
 The FastMCP app sets **`instructions`** on the server (what MCP clients expose as guidance for the model). Current text (see `src/ridelogger_mcp/app.py`):
 
 ```
-Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). Authenticate with auth_login (email/password) and pass access_token to tools, or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. Call auth_me to read user settings including preferred currency_id. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Write tools use typed parameters aligned with ridelogger-api FormRequest validation (see each tool's schema in list_tools).
+Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). Authenticate through the MCP client's OAuth/Bearer flow and send Authorization: Bearer on HTTP requests — the server validates it via GET /api/auth/me. Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies to convert amounts to one currency before summing — see tool descriptions on those endpoints. Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. Write tools use typed parameters aligned with ridelogger-api FormRequest validation (see each tool's schema in list_tools).
 ```
 
 ---
@@ -109,12 +109,10 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 ## MCP tools (full catalog)
 
-**Auth:** `access_token` = optional if the HTTP client sends `Authorization: Bearer <JWT>` (middleware validates via `/api/auth/me`).
+**Auth:** public MCP clients should authenticate with OAuth/Bearer and send `Authorization: Bearer <token>` on MCP HTTP requests. The middleware validates the token via `/api/auth/me`. No username/password auth tools are exposed.
 
 | Tool | Token | Description |
 |------|-------|-------------|
-| `auth_login` | no | POST `/api/auth/login` — email, password; returns `access_token` / refresh. |
-| `auth_me` | yes | GET `/api/auth/me` — profile and `currency_id` (display currency). |
 | `reference_data_refresh` | no | Reload all cached reference datasets from the API. |
 
 **Vehicles**
@@ -181,7 +179,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `generic_vehicle_logs_list` | yes | GET `.../vehicles/{id}/vehicle_logs` (aggregated fuel/service/expense). |
 | `generic_vehicle_logs_delete` | yes | DELETE a generic vehicle log row. |
 | `vehicle_log_files_list` | yes | List files on a vehicle log. |
-| `vehicle_log_files_upload` | yes | Multipart upload (file path or base64). Free tier: one attachment per log (403 if full). |
+| `vehicle_log_files_upload` | yes | Multipart upload via `chat_upload_id` or `file_base64` + file name. Free tier: one attachment per log (403 if full). |
 | `vehicle_log_files_upload_base64` | yes | Upload via JSON — `chat_upload_id` or base64 file + name. Same one-file limit for non-premium. |
 | `vehicle_log_files_delete` | yes | Delete attachment. |
 | `vehicle_log_files_download` | yes | Download attachment bytes. |
@@ -193,15 +191,15 @@ Create/update tools expose **explicit parameters**; shapes match **ridelogger-ap
 ## Smoke tests
 
 1. **Health**: `curl -s http://localhost:8083/health`
-2. **Login** (tool `auth_login` or `curl -X POST http://localhost:8082/api/auth/login -H 'Content-Type: application/json' -d '{"email":"...","password":"..."}'`)
-3. **List vehicles** with returned `access_token` via tool `vehicles_list`
+2. **Authenticate** the MCP HTTP client with OAuth/Bearer.
+3. **List vehicles** with `Authorization: Bearer <token>` via tool `vehicles_list`
 4. **Fuel log**: `fuel_logs_create` with amount, currency_id, unit, unit_id, fuel_type_id, mileage, date (and optional fields)
 5. **Service logs**: `service_logs_list`
 6. **File on vehicle log**: `vehicle_log_files_upload` or `vehicle_log_files_upload_base64` for an existing `vehicle_log_id`
 
 ## Design notes
 
-- Only `auth_login` and `reference_data_refresh` omit `access_token`; other tools require a non-empty token and fail fast if missing (unless Bearer is set on the HTTP request).
+- Only `reference_data_refresh` omits user auth; user-data tools require `Authorization: Bearer` on the MCP HTTP request or a non-empty `access_token` parameter for compatible clients.
 - Tokens are never logged.
 - Upstream errors are mapped to structured `UpstreamApiError` messages (401/403/404/422/429/5xx hints).
 
@@ -216,11 +214,11 @@ Every tool has explicit FastMCP `annotations` derived from the single source of 
 | `idempotentHint=True` | Tool has `idempotency="idempotent"` — safe to repeat with same arguments |
 | `openWorldHint=False` | All tools — operate only on the authenticated user's bounded vehicle data |
 
-**Read tools (22):** `auth_me`, `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`, `reference_data_refresh`
+**Read tools:** `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `vehicle_cabinet_list/get/download`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`, `reference_data_refresh`
 
 **Destructive delete tools (11, `destructiveHint=True`):** `fuel/charge/service/expense_logs_delete`, `generic_vehicle_logs_delete`, `vehicle_log_files_delete`, `vehicle_images_delete`, `vehicle_plates_delete`, `reminder_delete`
 
-**Write non-destructive (17):** all `_create`, `_update`, `_upload*`, `reminder_complete`, `user_avatar_upload`, `auth_login`, `vehicles_create/update`
+**Write non-destructive:** all `_create`, `_update`, `_upload*`, `reminder_complete`, `user_avatar_upload`, `vehicles_create/update`
 
 ### Adding a new tool
 

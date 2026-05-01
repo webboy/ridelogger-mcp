@@ -63,9 +63,6 @@ class RideLoggerBearerMiddleware(Middleware):
         context: MiddlewareContext[mt.CallToolRequestParams],
         call_next: CallNext[mt.CallToolRequestParams, ToolResult],
     ) -> ToolResult:
-        if context.message.name == "auth_login":
-            return await call_next(context)
-
         reset: Token[str | None] = _http_bearer_token.set(None)
         try:
             try:

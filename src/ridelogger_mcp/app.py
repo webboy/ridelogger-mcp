@@ -67,9 +67,8 @@ mcp = FastMCP(
     lifespan=lifespan_fn,
     instructions=(
         "Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). "
-        "Authenticate with auth_login (email/password) and pass access_token to tools, "
-        "or send Authorization: Bearer <JWT> on HTTP requests — the server validates it via GET /api/auth/me. "
-        "Call auth_me to read user settings including preferred currency_id. "
+        "Authenticate through the MCP client's OAuth/Bearer flow and send Authorization: Bearer on HTTP requests — "
+        "the server validates it via GET /api/auth/me. "
         "Expense, fuel, and service logs are multi-currency (each row has currency_id); use reference currencies "
         "to convert amounts to one currency before summing — see tool descriptions on those endpoints. "
         "Reference data (countries, currencies, …) is available as MCP resources ridelogger://reference/*. "

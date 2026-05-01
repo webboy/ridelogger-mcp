@@ -109,7 +109,7 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Upload a cabinet document (POST /api/vehicles/{vehicle_id}/cabinet-documents). "
             "Multipart: title, document_category, optional description/issued_at/expires_at, cabinet_file. "
-            "Provide exactly one file source: chat_upload_id, file_base64 + file_name, or file_path on the MCP host."
+            "Provide exactly one file source: chat_upload_id or file_base64 + file_name."
         ),
     )
     async def vehicle_cabinet_create(
@@ -122,13 +122,12 @@ def register(mcp: FastMCP) -> None:
         chat_upload_id: str | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
-        file_path: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
             st = get_state()
-            has_binary_source = bool(file_path or file_base64)
+            has_binary_source = bool(file_base64)
             if chat_upload_id and has_binary_source:
                 raise ValueError("Use either chat_upload_id or file upload fields, not both.")
 
@@ -136,15 +135,11 @@ def register(mcp: FastMCP) -> None:
             if chat_upload_id:
                 fname = None
                 raw = None
-            elif file_path:
-                with open(file_path, "rb") as f:
-                    raw = f.read()
-                fname = file_name or file_path.rsplit("/", maxsplit=1)[-1]
             elif file_base64 and file_name:
                 raw = base64.b64decode(file_base64)
                 fname = file_name
             else:
-                raise ValueError("Provide chat_upload_id, file_base64+file_name, or file_path.")
+                raise ValueError("Provide chat_upload_id, or file_base64+file_name.")
             if raw is not None and fname is not None:
                 files = {"cabinet_file": (fname, io.BytesIO(raw), "application/octet-stream")}
             data: dict[str, Any] = {
@@ -178,7 +173,7 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Update cabinet document metadata and/or replace file "
             "(PUT /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}). "
-            "Optional file_base64 + file_name or file_path for cabinet_file."
+            "Optional file_base64 + file_name for cabinet_file."
         ),
     )
     async def vehicle_cabinet_update(
@@ -191,7 +186,6 @@ def register(mcp: FastMCP) -> None:
         expires_at: str | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
-        file_path: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
@@ -199,11 +193,7 @@ def register(mcp: FastMCP) -> None:
             st = get_state()
             raw = None
             fname = None
-            if file_path:
-                with open(file_path, "rb") as f:
-                    raw = f.read()
-                fname = file_name or file_path.rsplit("/", maxsplit=1)[-1]
-            elif file_base64 and file_name:
+            if file_base64 and file_name:
                 raw = base64.b64decode(file_base64)
                 fname = file_name
 

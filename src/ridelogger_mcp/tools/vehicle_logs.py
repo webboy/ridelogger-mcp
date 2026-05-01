@@ -116,7 +116,7 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
             "Requires access_token or HTTP Bearer. Exactly one of: chat_upload_id (AI chat attachment UUID), "
-            "or file_base64 + file_name, or file_path. "
+            "or file_base64 + file_name. "
             "Non-premium users: at most one attachment per vehicle log; if one already exists, API returns 403 "
             "(remove it with vehicle_log_files_delete or use a premium account). Premium: multiple attachments allowed."
         ),
@@ -126,14 +126,13 @@ def register(mcp: FastMCP) -> None:
         vehicle_log_id: int,
         file_name: str | None = None,
         file_base64: str | None = None,
-        file_path: str | None = None,
         chat_upload_id: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
             st = get_state()
-            if chat_upload_id and (file_path or file_base64 or file_name):
+            if chat_upload_id and (file_base64 or file_name):
                 raise ValueError("Use either chat_upload_id or file fields, not both.")
             if chat_upload_id:
                 resp = await st.client.request(
@@ -143,16 +142,12 @@ def register(mcp: FastMCP) -> None:
                     data={"chat_upload_id": chat_upload_id.strip()},
                 )
             else:
-                if file_path:
-                    with open(file_path, "rb") as f:
-                        raw = f.read()
-                elif file_base64 and file_name:
+                if file_base64 and file_name:
                     raw = base64.b64decode(file_base64)
                 else:
-                    raise ValueError("Provide chat_upload_id, or file_base64+file_name, or file_path.")
-                fname = file_name or "upload.bin"
+                    raise ValueError("Provide chat_upload_id, or file_base64+file_name.")
                 files = {
-                    "vehicle_log_file": (fname, io.BytesIO(raw), "application/octet-stream"),
+                    "vehicle_log_file": (file_name, io.BytesIO(raw), "application/octet-stream"),
                 }
                 resp = await st.client.request(
                     "POST",

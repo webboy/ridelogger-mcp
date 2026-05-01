@@ -15,11 +15,9 @@ if TYPE_CHECKING:
 POLICY_CONTRACT_VERSION = "2026-04-23.1"
 POLICY_RESOURCE_URI = "ridelogger://policy/tool-semantics"
 
-# Keep in sync with every @mcp.tool name in tools/*.py (auth_login included for Cursor; app excludes it in client).
+# Keep in sync with every @mcp.tool name in tools/*.py.
 REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
     {
-        "auth_login",
-        "auth_me",
         "user_avatar_upload",
         "vehicles_list",
         "vehicles_create",
@@ -126,19 +124,6 @@ def _write(
 
 # Single source of truth: tool name -> policy (x-ridelogger-compatible shape).
 TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
-    "auth_login": {
-        "kind": "mcp",
-        "category": "acquisition",
-        "mutation": True,
-        "confirmation": "none",
-        "risk": "medium",
-        "risk_level": "medium",
-        "side_effect_scope": "account",
-        "idempotency": "non_idempotent",
-        "requires": ["email", "password"],
-        "provides": ["access_token"],
-    },
-    "auth_me": _read("account", risk="low", provides=["user_profile", "preferred_currency_id"]),
     "user_avatar_upload": _write("account", confirmation="recommended", requires=["file"], provides=["user_profile"]),
     "reference_data_refresh": _read(
         "session",

@@ -84,7 +84,7 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Upload a gallery image (POST /api/vehicles/{vehicle_id}/images). "
             "Requires access_token or HTTP Bearer. "
             "Exactly one of: (1) chat_upload_id — UUID from AI chat attachment (ai_chat_uploaded_files), "
-            "(2) file_base64 + file_name, (3) file_path on the MCP host. "
+            "(2) file_base64 + file_name. "
             "When using chat_upload_id, send form field chat_upload_id only (no binary)."
         ),
     )
@@ -92,14 +92,13 @@ def register(mcp: FastMCP) -> None:
         vehicle_id: int,
         file_name: str | None = None,
         file_base64: str | None = None,
-        file_path: str | None = None,
         chat_upload_id: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
             token = require_token(access_token)
             st = get_state()
-            if chat_upload_id and (file_path or file_base64 or file_name):
+            if chat_upload_id and (file_base64 or file_name):
                 raise ValueError("Use either chat_upload_id or file upload fields, not both.")
             if chat_upload_id:
                 resp = await st.client.request(
@@ -109,16 +108,12 @@ def register(mcp: FastMCP) -> None:
                     data={"chat_upload_id": chat_upload_id.strip()},
                 )
             else:
-                if file_path:
-                    with open(file_path, "rb") as f:
-                        raw = f.read()
-                elif file_base64 and file_name:
+                if file_base64 and file_name:
                     raw = base64.b64decode(file_base64)
                 else:
-                    raise ValueError("Provide chat_upload_id, or file_base64+file_name, or file_path.")
-                fname = file_name or "upload.bin"
+                    raise ValueError("Provide chat_upload_id, or file_base64+file_name.")
                 files = {
-                    "image": (fname, io.BytesIO(raw), "application/octet-stream"),
+                    "image": (file_name, io.BytesIO(raw), "application/octet-stream"),
                 }
                 resp = await st.client.request(
                     "POST",

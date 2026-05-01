@@ -10,9 +10,9 @@ from ridelogger_mcp.bearer_auth import get_http_bearer_token
 # Appended to tool descriptions for endpoints that return monetary log rows (fuel, service, expense, …).
 MONEY_LOGS_HINT = (
     "Money: logs are multi-currency — each row has its own `currency_id`, and `amount` / `total` are in that row's currency. "
-    "Do not sum raw numbers across rows without converting. Call `auth_me` for the user's preferred `currency_id` "
-    "(account settings), use MCP resource `ridelogger://reference/currencies` (or GET /api/currencies) for codes and "
-    "exchange `value` fields, then normalize every row to one target currency before aggregating or comparing totals."
+    "Do not sum raw numbers across rows without converting. Use MCP resource `ridelogger://reference/currencies` "
+    "(or GET /api/currencies) for codes and exchange `value` fields, then normalize every row to one target currency "
+    "before aggregating or comparing totals."
 )
 
 # Embedded reference objects in vehicle responses (API v1.3+).
@@ -42,7 +42,7 @@ def require_token(access_token: str | None) -> str:
     if not access_token or not str(access_token).strip():
         raise ValueError(
             "access_token is required (or send Authorization: Bearer on the MCP HTTP request). "
-            "Call auth_login and pass access_token to tools, or configure the client with a Bearer token."
+            "Configure the MCP client OAuth/Bearer connection and retry."
         )
     return str(access_token).strip()
 
