@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastmcp import FastMCP
 
 from ridelogger_mcp.tools import (
+    auth,
     charge_logs,
     expense_logs,
     fuel_logs,
@@ -21,6 +22,7 @@ from ridelogger_mcp.tools import (
 
 
 def register_all(mcp: FastMCP) -> None:
+    auth.register(mcp)
     user.register(mcp)
     vehicles.register(mcp)
     plates.register(mcp)

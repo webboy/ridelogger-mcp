@@ -18,6 +18,7 @@ POLICY_RESOURCE_URI = "ridelogger://policy/tool-semantics"
 # Keep in sync with every @mcp.tool name in tools/*.py.
 REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
     {
+        "auth_me",
         "user_avatar_upload",
         "vehicles_list",
         "vehicles_create",
@@ -124,6 +125,7 @@ def _write(
 
 # Single source of truth: tool name -> policy (x-ridelogger-compatible shape).
 TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
+    "auth_me": _read("account", risk="low", provides=["user_profile", "preferred_currency_id"]),
     "user_avatar_upload": _write("account", confirmation="recommended", requires=["file"], provides=["user_profile"]),
     "reference_data_refresh": _read(
         "session",

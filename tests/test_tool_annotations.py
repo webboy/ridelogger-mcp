@@ -104,7 +104,7 @@ def test_list_tools_read_only_tools_correct() -> None:
     tools = asyncio.run(mcp.list_tools())
     tool_map = {t.name: t for t in tools}
 
-    read_only_samples = ["vehicles_list", "fuel_logs_get", "vehicle_log_files_list", "reminder_show"]
+    read_only_samples = ["vehicles_list", "auth_me", "fuel_logs_get", "reminder_show"]
     for name in read_only_samples:
         t = tool_map[name]
         assert t.annotations.readOnlyHint is True, f"{name}: expected readOnlyHint=True"

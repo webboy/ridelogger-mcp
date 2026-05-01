@@ -113,6 +113,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 | Tool | Token | Description |
 |------|-------|-------------|
+| `auth_me` | yes | GET `/api/auth/me` — profile and `currency_id` (display currency). No username/password login tool is exposed. |
 | `reference_data_refresh` | no | Reload all cached reference datasets from the API. |
 
 **Vehicles**
@@ -214,7 +215,7 @@ Every tool has explicit FastMCP `annotations` derived from the single source of 
 | `idempotentHint=True` | Tool has `idempotency="idempotent"` — safe to repeat with same arguments |
 | `openWorldHint=False` | All tools — operate only on the authenticated user's bounded vehicle data |
 
-**Read tools:** `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `vehicle_cabinet_list/get/download`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`, `reference_data_refresh`
+**Read tools:** `auth_me`, `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `vehicle_cabinet_list/get/download`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`, `reference_data_refresh`
 
 **Destructive delete tools (11, `destructiveHint=True`):** `fuel/charge/service/expense_logs_delete`, `generic_vehicle_logs_delete`, `vehicle_log_files_delete`, `vehicle_images_delete`, `vehicle_plates_delete`, `reminder_delete`
 
