@@ -70,10 +70,7 @@ def create_auth_provider() -> RemoteAuthProvider:
     resource_url = os.getenv("OAUTH_RESOURCE_URL", "https://mcp.ridelogger.com/mcp")
     base_url = resource_url.rsplit("/", 1)[0]
 
-    verifier = RideLoggerTokenVerifier(
-        base_url=base_url,
-        resource_base_url=base_url,
-    )
+    verifier = RideLoggerTokenVerifier(base_url=base_url)
 
     return RemoteAuthProvider(
         token_verifier=verifier,
