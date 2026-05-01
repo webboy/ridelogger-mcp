@@ -76,7 +76,6 @@ def create_auth_provider() -> RemoteAuthProvider:
         token_verifier=verifier,
         authorization_servers=[authorization_server],
         base_url=base_url,
-        resource_base_url=base_url,
         scopes_supported=OAUTH_SCOPES,
         resource_name="RideLogger MCP",
     )
