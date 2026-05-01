@@ -22,6 +22,7 @@ OAUTH_SCOPES: list[str] = [
     "logs:write",
     "files:read",
     "files:write",
+    "reminders:read",
 ]
 
 
