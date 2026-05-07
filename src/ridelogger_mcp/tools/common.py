@@ -78,14 +78,17 @@ def compact_query_params(values: dict[str, Any]) -> dict[str, Any] | None:
 
 def tool_error(e: Exception) -> dict[str, Any]:
     if isinstance(e, UpstreamApiError):
-        return {
-            "ok": False,
-            "error": {
-                "type": "upstream_api",
-                "status_code": e.status_code,
-                "message": e.message,
-            },
+        err_obj: dict[str, Any] = {
+            "type": "upstream_api",
+            "status_code": e.status_code,
+            "message": e.message,
         }
+        body = e.body
+        if isinstance(body, dict):
+            field_errors = body.get("errors")
+            if isinstance(field_errors, dict) and field_errors:
+                err_obj["errors"] = field_errors
+        return {"ok": False, "error": err_obj}
     if isinstance(e, ValueError):
         return {"ok": False, "error": {"type": "validation", "message": str(e)}}
     return {

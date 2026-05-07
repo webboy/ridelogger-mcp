@@ -227,3 +227,5 @@ Every tool has explicit FastMCP `annotations` derived from the single source of 
 2. Add the name to `REGISTERED_TOOL_NAMES`.
 3. Add `annotations=get_annotations("tool_name")` to the `@mcp.tool()` decorator.
 4. Run `pytest tests/test_tool_annotations.py` — it will fail if step 1 or 2 is missing.
+
+Claude AI: tB79C85hTLnh7G03lUHLrWhsEXaZGcgZfiQFaub2
