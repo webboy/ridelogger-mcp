@@ -19,6 +19,7 @@ MONEY_LOGS_HINT = (
 VEHICLE_REFS_HINT = (
     "Each vehicle includes resolved reference objects alongside raw IDs: "
     "vehicle_type {id,name}, fuel_type {id,name}, mileage_unit {id,name,unit,ratio}, "
+    "steering_side {id,name}, "
     "fuel_unit {id,name,unit,units,ratio}, vehicle_make_info {id,name}, vehicle_model_info {id,name}. "
     "Use these instead of cross-referencing IDs with ridelogger://reference/* resources."
 )

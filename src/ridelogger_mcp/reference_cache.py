@@ -9,24 +9,9 @@ from typing import Any
 
 from ridelogger_mcp.api_client import ApiClient
 from ridelogger_mcp.config import Settings
+from ridelogger_mcp.reference_paths import REFERENCE_PATHS
 
 logger = logging.getLogger(__name__)
-
-# Relative to api base (includes /api)
-REFERENCE_PATHS: dict[str, str] = {
-    "countries": "/countries",
-    "currencies": "/currencies",
-    "vehicle_types": "/vehicle_types",
-    "vehicle_makes": "/vehicle_makes",
-    "fuel_types": "/fuel_types",
-    "fuel_units": "/fuel_units",
-    "charge_types": "/charge_types",
-    "energy_units": "/energy_units",
-    "powertrain_types": "/powertrain_types",
-    "service_types": "/service_types",
-    "expense_types": "/expense_types",
-    "mileage_units": "/mileage_units",
-}
 
 
 class ReferenceCache:

@@ -6,7 +6,7 @@ import json
 
 from fastmcp import FastMCP
 
-from ridelogger_mcp.reference_cache import REFERENCE_PATHS
+from ridelogger_mcp.reference_paths import REFERENCE_PATHS
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import POLICY_RESOURCE_URI, policy_resource_json
 

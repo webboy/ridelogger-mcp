@@ -66,8 +66,10 @@ def register(mcp: FastMCP) -> None:
         annotations=get_annotations("fuel_logs_create"),
         description=(
             "[WRITE] Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
-            "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, unit_id, fuel_type_id) "
+            "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, fuel_type_id) "
             "plus date (Y-m-d) for the vehicle log row; optional unit_price, uuid. "
+            "Optional unit_id (fuel quantity unit — `GET /api/fuel_units`): when omitted, API defaults from the "
+            "user's quantity preference then vehicle fuel unit. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
@@ -78,9 +80,9 @@ def register(mcp: FastMCP) -> None:
         currency_id: int,
         unit: float,
         mileage: int,
-        unit_id: int,
         fuel_type_id: int,
         date: str,
+        unit_id: int | None = None,
         unit_price: float | None = None,
         uuid: str | None = None,
         business_name: str | None = None,

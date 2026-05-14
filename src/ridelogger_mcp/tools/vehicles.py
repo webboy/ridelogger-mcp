@@ -59,8 +59,10 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Create a vehicle (POST /api/vehicles). Requires access_token or HTTP Bearer. "
             "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
-            "mileage_unit_id, fuel_type_id, label, production_year are required; vehicle_model_id is required "
-            "when vehicle_type_id is 1 (car). Optional: plate, valid_to, engine_displacement, engine_power_kw, "
+            "fuel_type_id, label, production_year are required; vehicle_model_id is required "
+            "when vehicle_type_id is 1 (car). Optional: mileage_unit_id (defaults from owner country), "
+            "steering_side_id (`GET /api/steering_sides`, defaults from owner country). "
+            "Optional: plate, valid_to, engine_displacement, engine_power_kw, "
             "engine_power_hp. "
             "Response includes the created vehicle. " + VEHICLE_REFS_HINT
         ),
@@ -69,10 +71,11 @@ def register(mcp: FastMCP) -> None:
         vehicle_type_id: int,
         vehicle_make_id: int,
         mileage: int,
-        mileage_unit_id: int,
         fuel_type_id: int,
         label: str,
         production_year: int,
+        mileage_unit_id: int | None = None,
+        steering_side_id: int | None = None,
         vehicle_model_id: int | None = None,
         plate: str | None = None,
         valid_to: str | None = None,
@@ -89,6 +92,7 @@ def register(mcp: FastMCP) -> None:
                 vehicle_model_id=vehicle_model_id,
                 mileage=mileage,
                 mileage_unit_id=mileage_unit_id,
+                steering_side_id=steering_side_id,
                 fuel_type_id=fuel_type_id,
                 label=label,
                 production_year=production_year,
@@ -136,10 +140,12 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
             "Only **vehicle_id** is required; include **only fields that change** (API merges with existing row). "
-            "Omitted parameters are not sent. For **cars** (vehicle_type_id=1), set **vehicle_make_id** and "
+            "Omitted parameters are not sent. **mileage_unit_id** cannot be changed after create — omit it on update. "
+            "For **cars** (vehicle_type_id=1), set **vehicle_make_id** and "
             "**vehicle_model_id** from reference data when you change identity; omit **vehicle_model_id** for "
             "motorcycles/trucks. Do not send null for unknown IDs — omit the key instead. "
-            "Optional: powertrain_id, plate, valid_to, country_id (with plate), engine_*. "
+            "Optional: steering_side_id (`GET /api/steering_sides`), powertrain_id, plate, valid_to, country_id "
+            "(with plate), engine_*. "
             + VEHICLE_REFS_HINT
         ),
     )
@@ -149,7 +155,7 @@ def register(mcp: FastMCP) -> None:
         vehicle_make_id: int | None = None,
         vehicle_model_id: int | None = None,
         mileage: int | None = None,
-        mileage_unit_id: int | None = None,
+        steering_side_id: int | None = None,
         fuel_type_id: int | None = None,
         label: str | None = None,
         production_year: int | None = None,
@@ -169,7 +175,7 @@ def register(mcp: FastMCP) -> None:
                 vehicle_make_id=vehicle_make_id,
                 vehicle_model_id=vehicle_model_id,
                 mileage=mileage,
-                mileage_unit_id=mileage_unit_id,
+                steering_side_id=steering_side_id,
                 fuel_type_id=fuel_type_id,
                 label=label,
                 production_year=production_year,

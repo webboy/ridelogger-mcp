@@ -88,6 +88,8 @@ Payload envelope: `data`, `fetched_at`, `ttl_seconds`, `source_endpoint`.
 | `ridelogger://reference/service_types` | Service types |
 | `ridelogger://reference/expense_types` | Expense types |
 | `ridelogger://reference/mileage_units` | Mileage units |
+| `ridelogger://reference/steering_sides` | Steering side (LHD/RHD) |
+| `ridelogger://reference/fuel_consumption_units` | Fuel consumption display units (l/100km, MPG variants) |
 
 Manual refresh (no token): tool **`reference_data_refresh`**.
 
@@ -194,7 +196,7 @@ Create/update tools expose **explicit parameters**; shapes match **ridelogger-ap
 1. **Health**: `curl -s http://localhost:8083/health`
 2. **Authenticate** the MCP HTTP client with OAuth/Bearer.
 3. **List vehicles** with `Authorization: Bearer <token>` via tool `vehicles_list`
-4. **Fuel log**: `fuel_logs_create` with amount, currency_id, unit, unit_id, fuel_type_id, mileage, date (and optional fields)
+4. **Fuel log**: `fuel_logs_create` with amount, currency_id, unit, fuel_type_id, mileage, date (optional `unit_id`; optional fields)
 5. **Service logs**: `service_logs_list`
 6. **File on vehicle log**: `vehicle_log_files_upload` or `vehicle_log_files_upload_base64` for an existing `vehicle_log_id`
 
