@@ -191,6 +191,20 @@ Create/update tools expose **explicit parameters**; shapes match **ridelogger-ap
 
 ---
 
+## Unit tests (pytest)
+
+Install dev deps and run the suite from repo root:
+
+```bash
+cd ridelogger-mcp
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest
+```
+
+- **Annotation / registry parity:** `tests/test_tool_annotations.py` — `REGISTERED_TOOL_NAMES`, `TOOL_SEMANTICS`, FastMCP `list_tools`, and annotation hints stay aligned when tools change.
+- **Tool dispatch stubs:** `tests/test_tool_dispatch_upstream.py` exercises every registered tool name against a stubbed RideLogger HTTP client.
+
 ## Smoke tests
 
 1. **Health**: `curl -s http://localhost:8083/health`

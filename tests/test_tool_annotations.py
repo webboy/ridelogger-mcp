@@ -82,6 +82,14 @@ def test_no_destructive_hint_for_non_high_risk_tools(tool_name: str) -> None:
     assert ann.destructiveHint is False, f"{tool_name}: risk!=high but destructiveHint is True"
 
 
+def test_fastmcp_list_tool_names_equal_registry() -> None:
+    """Names returned by FastMCP must equal REGISTERED_TOOL_NAMES (guards decorator drift)."""
+    from ridelogger_mcp.app import mcp
+
+    tools = asyncio.run(mcp.list_tools())
+    assert frozenset(t.name for t in tools) == REGISTERED_TOOL_NAMES
+
+
 # --- Integration: verify annotations are visible via FastMCP list_tools ---
 
 
