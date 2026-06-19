@@ -12,7 +12,7 @@ from starlette.responses import JSONResponse, PlainTextResponse, Response
 
 from ridelogger_mcp import __version__
 from ridelogger_mcp.api_client import ApiClient
-from ridelogger_mcp.auth_provider import OAUTH_SCOPES, create_auth_provider
+from ridelogger_mcp.auth_provider import OAUTH_SCOPES
 from ridelogger_mcp.bearer_auth import RideLoggerBearerMiddleware
 from ridelogger_mcp.config import Settings
 from ridelogger_mcp.logging_setup import setup_logging
@@ -66,7 +66,6 @@ async def lifespan_fn(server: FastMCP) -> None:
 mcp = FastMCP(
     "RideLogger MCP",
     lifespan=lifespan_fn,
-    auth=create_auth_provider(),
     instructions=(
         "Thin MCP wrapper over the RideLogger REST API (vehicle maintenance logbook). "
         "Authenticate through the MCP client's OAuth/Bearer flow and send Authorization: Bearer on HTTP requests — "

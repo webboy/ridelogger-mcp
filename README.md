@@ -111,7 +111,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 ## MCP tools (full catalog)
 
-**Auth:** public MCP clients should authenticate with OAuth/Bearer and send `Authorization: Bearer <token>` on MCP HTTP requests. The middleware validates the token via `/api/auth/me`. No username/password auth tools are exposed.
+**Auth:** MCP discovery requests (`initialize`, `tools/list`, `resources/list`) are public so ChatGPT/OpenAI Platform and other clients can scan the server. User-data tool calls require OAuth/Bearer and should send `Authorization: Bearer <token>` on MCP HTTP requests. The tool-call middleware validates the token via `/api/auth/me`. No username/password auth tools are exposed.
 
 | Tool | Token | Description |
 |------|-------|-------------|
@@ -216,7 +216,7 @@ pytest
 
 ## Design notes
 
-- Only `reference_data_refresh` omits user auth; user-data tools require OAuth/Bearer authorization on the MCP HTTP request. A hidden legacy `access_token` argument remains accepted for older non-HTTP clients, but it is excluded from MCP input schemas.
+- Only MCP discovery and `reference_data_refresh` omit user auth; user-data tools require OAuth/Bearer authorization on the MCP HTTP request. A hidden legacy `access_token` argument remains accepted for older non-HTTP clients, but it is excluded from MCP input schemas.
 - Tokens are never logged.
 - Upstream errors are mapped to structured `UpstreamApiError` messages (401/403/404/422/429/5xx hints).
 

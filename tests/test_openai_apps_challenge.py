@@ -7,11 +7,41 @@ is set, and 404 when it is not.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from unittest import mock
 
 import pytest
 from starlette.testclient import TestClient
+
+
+async def _sleeping_refresh_loop(_self):
+    await asyncio.sleep(3600)
+
+
+def _initialize_mcp_session(client: TestClient) -> dict[str, str]:
+    headers = {
+        "accept": "application/json, text/event-stream",
+        "content-type": "application/json",
+    }
+    response = client.post(
+        "/mcp",
+        headers=headers,
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {},
+                "clientInfo": {"name": "test-client", "version": "1.0"},
+            },
+        },
+    )
+    assert response.status_code == 200
+    session_id = response.headers.get("mcp-session-id")
+    assert session_id
+    return {**headers, "mcp-session-id": session_id}
 
 
 @pytest.fixture()
@@ -60,3 +90,54 @@ def test_challenge_returns_token_as_plain_text(client_with_token):
 def test_challenge_returns_404_when_token_unset(client_without_token):
     r = client_without_token.get("/.well-known/openai-apps-challenge")
     assert r.status_code == 404
+
+
+def test_mcp_discovery_is_public_for_openai_platform_scan():
+    with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
+        from ridelogger_mcp.app import mcp
+        from ridelogger_mcp.reference_cache import ReferenceCache
+
+        with (
+            mock.patch.object(ReferenceCache, "refresh", new=mock.AsyncMock()),
+            mock.patch.object(ReferenceCache, "refresh_loop", new=_sleeping_refresh_loop),
+        ):
+            app = mcp.http_app()
+            with TestClient(app) as client:
+                headers = _initialize_mcp_session(client)
+                response = client.post(
+                    "/mcp",
+                    headers=headers,
+                    json={"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                )
+
+    assert response.status_code == 200
+    assert "auth_me" in response.text
+    assert "vehicle_cabinet_list" in response.text
+    assert "auth_login" not in response.text
+
+
+def test_user_data_tool_call_without_bearer_returns_auth_error():
+    with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
+        from ridelogger_mcp.app import mcp
+        from ridelogger_mcp.reference_cache import ReferenceCache
+
+        with (
+            mock.patch.object(ReferenceCache, "refresh", new=mock.AsyncMock()),
+            mock.patch.object(ReferenceCache, "refresh_loop", new=_sleeping_refresh_loop),
+        ):
+            app = mcp.http_app()
+            with TestClient(app) as client:
+                headers = _initialize_mcp_session(client)
+                response = client.post(
+                    "/mcp",
+                    headers=headers,
+                    json={
+                        "jsonrpc": "2.0",
+                        "id": 2,
+                        "method": "tools/call",
+                        "params": {"name": "auth_me", "arguments": {}},
+                    },
+                )
+
+    assert response.status_code == 200
+    assert "Authorization is required" in response.text
