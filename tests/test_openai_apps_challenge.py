@@ -163,6 +163,28 @@ def test_mcp_discovery_accepts_octet_stream_json_for_openai_platform_scan():
     assert "auth_login" not in response.text
 
 
+def test_empty_mcp_post_returns_oauth_challenge_for_platform_probe():
+    with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
+        from ridelogger_mcp.app import http_middleware, mcp
+        from ridelogger_mcp.reference_cache import ReferenceCache
+
+        with (
+            mock.patch.object(ReferenceCache, "refresh", new=mock.AsyncMock()),
+            mock.patch.object(ReferenceCache, "refresh_loop", new=_sleeping_refresh_loop),
+        ):
+            app = mcp.http_app(middleware=http_middleware())
+            with TestClient(app) as client:
+                response = client.post(
+                    "/mcp",
+                    headers={"accept": "*/*", "content-type": "application/octet-stream"},
+                    content=b"",
+                )
+
+    assert response.status_code == 401
+    assert response.json()["error"] == "invalid_token"
+    assert "resource_metadata=" in response.headers["www-authenticate"]
+
+
 def test_oauth_protected_resource_aliases_for_platform_discovery():
     with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
         from ridelogger_mcp.app import mcp

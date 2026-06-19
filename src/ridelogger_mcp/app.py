@@ -38,6 +38,10 @@ class McpOctetStreamJsonMiddleware:
             and scope.get("method") == "POST"
             and str(scope.get("path", "")).rstrip("/") == "/mcp"
         ):
+            if _is_empty_body_probe(scope):
+                await _send_mcp_auth_probe_challenge(send)
+                return
+
             headers = []
             changed = False
             saw_accept = False
@@ -66,6 +70,39 @@ class McpOctetStreamJsonMiddleware:
                 scope = {**scope, "headers": headers}
 
         await self.app(scope, receive, send)
+
+
+def _is_empty_body_probe(scope) -> bool:
+    headers = dict(scope.get("headers", []))
+    content_length = headers.get(b"content-length")
+    return content_length in (None, b"", b"0")
+
+
+async def _send_mcp_auth_probe_challenge(send) -> None:
+    settings = Settings()
+    base_url = settings.oauth_resource_url.rsplit("/", 1)[0]
+    metadata_url = f"{base_url}/.well-known/oauth-protected-resource"
+    body = (
+        b'{"error":"invalid_token",'
+        b'"error_description":"Authentication required for user-data tool calls."}'
+    )
+    www_authenticate = (
+        'Bearer error="invalid_token", '
+        'error_description="Authentication required for user-data tool calls.", '
+        f'resource_metadata="{metadata_url}"'
+    )
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 401,
+            "headers": [
+                (b"content-type", b"application/json"),
+                (b"content-length", str(len(body)).encode()),
+                (b"www-authenticate", www_authenticate.encode()),
+            ],
+        }
+    )
+    await send({"type": "http.response.body", "body": body})
 
 
 def http_middleware() -> list[Middleware]:
