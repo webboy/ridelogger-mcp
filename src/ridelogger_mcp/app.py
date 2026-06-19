@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class McpOctetStreamJsonMiddleware:
-    """Accept OpenAI Platform MCP scan requests sent as octet-stream JSON."""
+    """Normalize OpenAI Platform MCP scan headers before FastMCP validation."""
 
     def __init__(self, app) -> None:
         self.app = app
@@ -40,15 +40,28 @@ class McpOctetStreamJsonMiddleware:
         ):
             headers = []
             changed = False
+            saw_accept = False
             for name, value in scope.get("headers", []):
+                lower_name = name.lower()
+                lower_value = value.lower()
                 if (
                     name.lower() == b"content-type"
                     and value.split(b";", 1)[0].strip().lower() == b"application/octet-stream"
                 ):
                     headers.append((name, b"application/json"))
                     changed = True
+                elif lower_name == b"accept":
+                    saw_accept = True
+                    if b"application/json" not in lower_value or b"text/event-stream" not in lower_value:
+                        headers.append((name, b"application/json, text/event-stream"))
+                        changed = True
+                    else:
+                        headers.append((name, value))
                 else:
                     headers.append((name, value))
+            if not saw_accept:
+                headers.append((b"accept", b"application/json, text/event-stream"))
+                changed = True
             if changed:
                 scope = {**scope, "headers": headers}
 
@@ -158,6 +171,8 @@ async def openai_apps_challenge(_request: Request) -> Response:
     return PlainTextResponse(token, media_type="text/plain; charset=utf-8")
 
 
+@mcp.custom_route("/mcp/.well-known/oauth-protected-resource", methods=["GET"])
+@mcp.custom_route("/.well-known/oauth-protected-resource/mcp", methods=["GET"])
 @mcp.custom_route("/.well-known/oauth-protected-resource", methods=["GET"])
 async def oauth_protected_resource(_request: Request) -> JSONResponse:
     settings = Settings()

@@ -129,7 +129,7 @@ def test_mcp_discovery_accepts_octet_stream_json_for_openai_platform_scan():
             app = mcp.http_app(middleware=http_middleware())
             with TestClient(app) as client:
                 headers = {
-                    "accept": "application/json, text/event-stream",
+                    "accept": "*/*",
                     "content-type": "application/octet-stream",
                 }
                 initialize_response = client.post(
@@ -161,6 +161,27 @@ def test_mcp_discovery_accepts_octet_stream_json_for_openai_platform_scan():
     assert response.status_code == 200
     assert "vehicle_cabinet_list" in response.text
     assert "auth_login" not in response.text
+
+
+def test_oauth_protected_resource_aliases_for_platform_discovery():
+    with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
+        from ridelogger_mcp.app import mcp
+        from ridelogger_mcp.reference_cache import ReferenceCache
+
+        with (
+            mock.patch.object(ReferenceCache, "refresh", new=mock.AsyncMock()),
+            mock.patch.object(ReferenceCache, "refresh_loop", new=_sleeping_refresh_loop),
+        ):
+            app = mcp.http_app()
+            with TestClient(app) as client:
+                responses = [
+                    client.get("/.well-known/oauth-protected-resource"),
+                    client.get("/.well-known/oauth-protected-resource/mcp"),
+                    client.get("/mcp/.well-known/oauth-protected-resource"),
+                ]
+
+    assert all(response.status_code == 200 for response in responses)
+    assert {response.json()["resource"] for response in responses} == {"https://mcp.ridelogger.com/mcp"}
 
 
 def test_user_data_tool_call_without_bearer_returns_auth_error():
