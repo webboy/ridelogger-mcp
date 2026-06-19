@@ -163,7 +163,7 @@ def test_mcp_discovery_accepts_octet_stream_json_for_openai_platform_scan():
     assert "auth_login" not in response.text
 
 
-def test_empty_mcp_post_returns_oauth_challenge_for_platform_probe():
+def test_empty_mcp_post_returns_no_content_for_platform_probe():
     with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
         from ridelogger_mcp.app import http_middleware, mcp
         from ridelogger_mcp.reference_cache import ReferenceCache
@@ -180,9 +180,8 @@ def test_empty_mcp_post_returns_oauth_challenge_for_platform_probe():
                     content=b"",
                 )
 
-    assert response.status_code == 401
-    assert response.json()["error"] == "invalid_token"
-    assert "resource_metadata=" in response.headers["www-authenticate"]
+    assert response.status_code == 204
+    assert response.text == ""
 
 
 def test_oauth_protected_resource_aliases_for_platform_discovery():
