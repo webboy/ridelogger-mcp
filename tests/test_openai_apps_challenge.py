@@ -8,6 +8,7 @@ is set, and 404 when it is not.
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 from unittest import mock
 
@@ -112,6 +113,52 @@ def test_mcp_discovery_is_public_for_openai_platform_scan():
 
     assert response.status_code == 200
     assert "auth_me" in response.text
+    assert "vehicle_cabinet_list" in response.text
+    assert "auth_login" not in response.text
+
+
+def test_mcp_discovery_accepts_octet_stream_json_for_openai_platform_scan():
+    with mock.patch.dict(os.environ, {"SK_API_URL": "https://api.ridelogger.com"}, clear=False):
+        from ridelogger_mcp.app import http_middleware, mcp
+        from ridelogger_mcp.reference_cache import ReferenceCache
+
+        with (
+            mock.patch.object(ReferenceCache, "refresh", new=mock.AsyncMock()),
+            mock.patch.object(ReferenceCache, "refresh_loop", new=_sleeping_refresh_loop),
+        ):
+            app = mcp.http_app(middleware=http_middleware())
+            with TestClient(app) as client:
+                headers = {
+                    "accept": "application/json, text/event-stream",
+                    "content-type": "application/octet-stream",
+                }
+                initialize_response = client.post(
+                    "/mcp",
+                    headers=headers,
+                    content=json.dumps(
+                        {
+                            "jsonrpc": "2.0",
+                            "id": 1,
+                            "method": "initialize",
+                            "params": {
+                                "protocolVersion": "2025-03-26",
+                                "capabilities": {},
+                                "clientInfo": {"name": "platform-scan", "version": "1.0"},
+                            },
+                        }
+                    ),
+                )
+                headers["mcp-session-id"] = initialize_response.headers["mcp-session-id"]
+                response = client.post(
+                    "/mcp",
+                    headers=headers,
+                    content=json.dumps(
+                        {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}
+                    ),
+                )
+
+    assert initialize_response.status_code == 200
+    assert response.status_code == 200
     assert "vehicle_cabinet_list" in response.text
     assert "auth_login" not in response.text
 

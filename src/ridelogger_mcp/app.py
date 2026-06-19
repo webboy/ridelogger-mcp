@@ -7,6 +7,7 @@ import logging
 
 from fastmcp import FastMCP
 from fastmcp.server.lifespan import lifespan
+from starlette.middleware import Middleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, Response
 
@@ -23,6 +24,39 @@ from ridelogger_mcp.state import AppState
 from ridelogger_mcp.tools import register_all
 
 logger = logging.getLogger(__name__)
+
+
+class McpOctetStreamJsonMiddleware:
+    """Accept OpenAI Platform MCP scan requests sent as octet-stream JSON."""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send) -> None:
+        if (
+            scope.get("type") == "http"
+            and scope.get("method") == "POST"
+            and str(scope.get("path", "")).rstrip("/") == "/mcp"
+        ):
+            headers = []
+            changed = False
+            for name, value in scope.get("headers", []):
+                if (
+                    name.lower() == b"content-type"
+                    and value.split(b";", 1)[0].strip().lower() == b"application/octet-stream"
+                ):
+                    headers.append((name, b"application/json"))
+                    changed = True
+                else:
+                    headers.append((name, value))
+            if changed:
+                scope = {**scope, "headers": headers}
+
+        await self.app(scope, receive, send)
+
+
+def http_middleware() -> list[Middleware]:
+    return [Middleware(McpOctetStreamJsonMiddleware)]
 
 
 @lifespan
@@ -145,4 +179,5 @@ def run_server() -> None:
         transport="http",
         host=settings.host,
         port=settings.port,
+        middleware=http_middleware(),
     )

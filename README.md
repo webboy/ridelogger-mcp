@@ -217,6 +217,7 @@ pytest
 ## Design notes
 
 - Only MCP discovery and `reference_data_refresh` omit user auth; user-data tools require OAuth/Bearer authorization on the MCP HTTP request. A hidden legacy `access_token` argument remains accepted for older non-HTTP clients, but it is excluded from MCP input schemas.
+- The HTTP app accepts OpenAI Platform scan requests that send JSON-RPC with `Content-Type: application/octet-stream` by normalizing that header to `application/json` for `POST /mcp` only.
 - Tokens are never logged.
 - Upstream errors are mapped to structured `UpstreamApiError` messages (401/403/404/422/429/5xx hints).
 
