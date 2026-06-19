@@ -78,6 +78,41 @@ REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
 )
 
 
+MCP_NON_READ_ONLY_TOOLS: frozenset[str] = frozenset(
+    {
+        "reference_data_refresh",
+    }
+)
+
+# ChatGPT Apps uses destructiveHint for deletes and overwrites. Keep this
+# separate from RideLogger's internal risk level so existing orchestrators do
+# not suddenly classify every partial update as high-risk.
+MCP_DESTRUCTIVE_HINT_TOOLS: frozenset[str] = frozenset(
+    {
+        "user_avatar_upload",
+        "vehicles_update",
+        "vehicle_plates_update",
+        "vehicle_plates_delete",
+        "vehicle_images_delete",
+        "vehicle_cabinet_update",
+        "vehicle_cabinet_delete",
+        "fuel_logs_update",
+        "fuel_logs_delete",
+        "charge_logs_update",
+        "charge_logs_delete",
+        "service_logs_update",
+        "service_logs_delete",
+        "expense_logs_update",
+        "expense_logs_delete",
+        "generic_vehicle_logs_delete",
+        "vehicle_log_files_delete",
+        "reminder_update",
+        "reminder_delete",
+        "reminder_complete",
+    }
+)
+
+
 def _read(
     scope: str,
     *,
@@ -198,20 +233,31 @@ TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
 }
 
 
-def build_annotations(semantics: dict[str, Any]) -> "ToolAnnotations":
+def build_annotations(
+    semantics: dict[str, Any],
+    *,
+    tool_name: str | None = None,
+) -> "ToolAnnotations":
     """Convert a TOOL_SEMANTICS entry into a FastMCP ToolAnnotations instance.
 
     Mapping rules:
-    - readOnlyHint=True  when mutation=False (no server-side user data changes)
-    - destructiveHint=True when risk="high" (irreversible deletes)
+    - readOnlyHint=True when a tool only retrieves or computes data without state changes
+    - destructiveHint=True when a tool can delete, overwrite, replace, or irreversibly advance user data
     - idempotentHint=True when idempotency="idempotent" (read-only tools)
     - openWorldHint=False for all — RideLogger tools operate on bounded user data only
     """
     from fastmcp.tools.tool import ToolAnnotations
 
+    is_user_data_mutation = semantics.get("mutation", False)
+    mutates_mcp_state = tool_name in MCP_NON_READ_ONLY_TOOLS
+    destructive = (
+        semantics.get("risk", "low") == "high"
+        or tool_name in MCP_DESTRUCTIVE_HINT_TOOLS
+    )
+
     return ToolAnnotations(
-        readOnlyHint=not semantics.get("mutation", False),
-        destructiveHint=semantics.get("risk", "low") == "high",
+        readOnlyHint=not is_user_data_mutation and not mutates_mcp_state,
+        destructiveHint=destructive,
         idempotentHint=semantics.get("idempotency", "non_idempotent") == "idempotent",
         openWorldHint=False,
     )
@@ -220,7 +266,7 @@ def build_annotations(semantics: dict[str, Any]) -> "ToolAnnotations":
 def get_annotations(tool_name: str) -> "ToolAnnotations":
     """Return FastMCP ToolAnnotations for a registered tool. Fails fast if unknown."""
     try:
-        return build_annotations(TOOL_SEMANTICS[tool_name])
+        return build_annotations(TOOL_SEMANTICS[tool_name], tool_name=tool_name)
     except KeyError:
         raise KeyError(f"No TOOL_SEMANTICS entry for tool '{tool_name}'. Add it before registering.")
 
@@ -229,8 +275,12 @@ def validate_registry() -> None:
     """Assert every registered MCP tool has semantics; fail fast in tests / CI."""
     missing = REGISTERED_TOOL_NAMES - set(TOOL_SEMANTICS)
     extra = set(TOOL_SEMANTICS) - REGISTERED_TOOL_NAMES
-    if missing or extra:
-        raise ValueError(f"tool_semantics out of sync: missing={sorted(missing)} extra={sorted(extra)}")
+    hint_unknown = (MCP_NON_READ_ONLY_TOOLS | MCP_DESTRUCTIVE_HINT_TOOLS) - REGISTERED_TOOL_NAMES
+    if missing or extra or hint_unknown:
+        raise ValueError(
+            "tool_semantics out of sync: "
+            f"missing={sorted(missing)} extra={sorted(extra)} hint_unknown={sorted(hint_unknown)}"
+        )
 
 
 def policy_resource_json() -> str:
@@ -256,6 +306,8 @@ __all__ = [
     "POLICY_RESOURCE_URI",
     "REGISTERED_TOOL_NAMES",
     "TOOL_SEMANTICS",
+    "MCP_NON_READ_ONLY_TOOLS",
+    "MCP_DESTRUCTIVE_HINT_TOOLS",
     "build_annotations",
     "get_annotations",
     "policy_resource_json",

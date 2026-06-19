@@ -25,9 +25,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_list",
         annotations=get_annotations("generic_vehicle_logs_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List all vehicle log entries for a vehicle (fuel, service, expense) — "
-            "GET /api/vehicles/{vehicle_id}/vehicle_logs. Requires access_token or HTTP Bearer. "
+            "GET /api/vehicles/{vehicle_id}/vehicle_logs. Requires OAuth/Bearer authorization. "
             "Filters (passed as query params, combined with AND): date_from -> `from`, date_to -> `to` "
             "(Y-m-d, inclusive bounds), currency_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -63,9 +64,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_delete",
         annotations=get_annotations("generic_vehicle_logs_delete"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete a generic vehicle log row (DELETE /api/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}). "
-            "Requires access_token or HTTP Bearer. Returns 202 on success."
+            "Requires OAuth/Bearer authorization. Returns 202 on success."
         ),
     )
     async def generic_vehicle_logs_delete(
@@ -88,9 +90,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_list",
         annotations=get_annotations("vehicle_log_files_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List file attachments on a vehicle log (GET .../vehicle_logs/{vehicle_log_id}/get_files). "
-            "Requires access_token or HTTP Bearer."
+            "Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_log_files_list(
@@ -113,9 +116,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload",
         annotations=get_annotations("vehicle_log_files_upload"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
-            "Requires access_token or HTTP Bearer. Exactly one of: chat_upload_id (AI chat attachment UUID), "
+            "Requires OAuth/Bearer authorization. Exactly one of: chat_upload_id (AI chat attachment UUID), "
             "or file_base64 + file_name. "
             "Non-premium users: at most one attachment per vehicle log; if one already exists, API returns 403 "
             "(remove it with vehicle_log_files_delete or use a premium account). Premium: multiple attachments allowed."
@@ -164,9 +168,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload_base64",
         annotations=get_annotations("vehicle_log_files_upload_base64"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Upload attachment via JSON body (POST .../put_files_cordova). "
-            "Requires access_token or HTTP Bearer. "
+            "Requires OAuth/Bearer authorization. "
             "Either chat_upload_id (AI chat attachment UUID), or vehicle_log_file (base64) + vehicle_log_file_name — "
             "mutually exclusive. "
             "Non-premium: max one file per log (403 if a file is already attached; delete first or upgrade). "
@@ -208,8 +213,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_delete",
         annotations=get_annotations("vehicle_log_files_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete one attachment by media uuid (DELETE .../delete_files/{uuid}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete one attachment by media uuid (DELETE .../delete_files/{uuid}). Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_log_files_delete(
@@ -233,8 +239,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_download",
         annotations=get_annotations("vehicle_log_files_download"),
+        exclude_args=["access_token"],
         description=(
-            "[READ] Download attachment bytes as base64 (GET .../download_files/{uuid}). Requires access_token or HTTP Bearer."
+            "[READ] Download attachment bytes as base64 (GET .../download_files/{uuid}). Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_log_files_download(

@@ -15,9 +15,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_list",
         annotations=get_annotations("vehicles_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List vehicles the user can manage (GET /api/vehicles). "
-            "Requires access_token or HTTP Bearer. "
+            "Requires OAuth/Bearer authorization. "
             "Optional filters: vehicle_make_id, vehicle_model_id, production_year (query params). "
             "Optional page for paginated responses if API supports it. "
             "Returns { data: [...] }. "
@@ -56,8 +57,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_create",
         annotations=get_annotations("vehicles_create"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Create a vehicle (POST /api/vehicles). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create a vehicle (POST /api/vehicles). Requires OAuth/Bearer authorization. "
             "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
             "fuel_type_id, label, production_year are required; vehicle_model_id is required "
             "when vehicle_type_id is 1 (car). Optional: mileage_unit_id (defaults from owner country), "
@@ -116,8 +118,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_get",
         annotations=get_annotations("vehicles_get"),
+        exclude_args=["access_token"],
         description=(
-            "[READ] Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires OAuth/Bearer authorization. "
             + VEHICLE_REFS_HINT
         ),
     )
@@ -137,8 +140,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_update",
         annotations=get_annotations("vehicles_update"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires OAuth/Bearer authorization. "
             "Only **vehicle_id** is required; include **only fields that change** (API merges with existing row). "
             "Omitted parameters are not sent. **mileage_unit_id** cannot be changed after create — omit it on update. "
             "For **cars** (vehicle_type_id=1), set **vehicle_make_id** and "

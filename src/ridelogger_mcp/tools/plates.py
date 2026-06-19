@@ -15,9 +15,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_list",
         annotations=get_annotations("vehicle_plates_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List plates for a vehicle (GET /api/vehicles/{vehicle_id}/vehicle_plates). "
-            "Requires access_token or HTTP Bearer."
+            "Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_plates_list(
@@ -39,8 +40,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_create",
         annotations=get_annotations("vehicle_plates_create"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Create plate (POST .../vehicle_plates). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create plate (POST .../vehicle_plates). Requires OAuth/Bearer authorization. "
             "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid."
         ),
     )
@@ -76,8 +78,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_update",
         annotations=get_annotations("vehicle_plates_update"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Update plate (PUT .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update plate (PUT .../vehicle_plates/{plate_id}). Requires OAuth/Bearer authorization. "
             "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to."
         ),
     )
@@ -112,8 +115,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_delete",
         annotations=get_annotations("vehicle_plates_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete plate (DELETE .../vehicle_plates/{plate_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete plate (DELETE .../vehicle_plates/{plate_id}). Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_plates_delete(

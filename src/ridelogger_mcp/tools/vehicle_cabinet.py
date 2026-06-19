@@ -18,9 +18,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_list",
         annotations=get_annotations("vehicle_cabinet_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List cabinet documents for a vehicle "
-            "(GET /api/vehicles/{vehicle_id}/cabinet-documents). Requires access_token or HTTP Bearer."
+            "(GET /api/vehicles/{vehicle_id}/cabinet-documents). Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_cabinet_list(
@@ -42,9 +43,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_get",
         annotations=get_annotations("vehicle_cabinet_get"),
+        exclude_args=["access_token"],
         description=(
             "[READ] Show one cabinet document metadata "
-            "(GET /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}). Requires access_token or HTTP Bearer."
+            "(GET /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}). Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_cabinet_get(
@@ -67,6 +69,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_download",
         annotations=get_annotations("vehicle_cabinet_download"),
+        exclude_args=["access_token"],
         description=(
             "[READ] Download cabinet file bytes "
             "(GET /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}/download). "
@@ -106,6 +109,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_create",
         annotations=get_annotations("vehicle_cabinet_create"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Upload a cabinet document (POST /api/vehicles/{vehicle_id}/cabinet-documents). "
             "Multipart: title, document_category, optional description/issued_at/expires_at, cabinet_file. "
@@ -170,6 +174,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_update",
         annotations=get_annotations("vehicle_cabinet_update"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Update cabinet document metadata and/or replace file "
             "(PUT /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}). "
@@ -244,9 +249,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_delete",
         annotations=get_annotations("vehicle_cabinet_delete"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete cabinet document (DELETE .../cabinet-documents/{document_id}). "
-            "Requires access_token or HTTP Bearer."
+            "Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_cabinet_delete(

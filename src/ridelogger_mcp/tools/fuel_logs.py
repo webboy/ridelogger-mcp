@@ -22,9 +22,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_list",
         annotations=get_annotations("fuel_logs_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List fuel logs for a vehicle (GET /api/vehicles/{vehicle_id}/fuel_logs). "
-            "Requires access_token or HTTP Bearer. Optional page for pagination. "
+            "Requires OAuth/Bearer authorization. Optional page for pagination. "
             "Filters (passed as query params to the API, combined with AND): date_from -> `from`, date_to -> `to` (Y-m-d, inclusive bounds), "
             "currency_id, fuel_type_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -64,8 +65,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_create",
         annotations=get_annotations("fuel_logs_create"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Create fuel log (POST .../fuel_logs). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create fuel log (POST .../fuel_logs). Requires OAuth/Bearer authorization. "
             "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, fuel_type_id) "
             "plus date (Y-m-d) for the vehicle log row; optional unit_price, uuid. "
             "Optional unit_id (fuel quantity unit — `GET /api/fuel_units`): when omitted, API defaults from the "
@@ -124,8 +126,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_get",
         annotations=get_annotations("fuel_logs_get"),
+        exclude_args=["access_token"],
         description=(
-            "[READ] Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -149,8 +152,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_update",
         annotations=get_annotations("fuel_logs_update"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires OAuth/Bearer authorization. "
             "Optional fields per FuelLogUpdateRequest (fuel row) plus vehicle log fields amount, currency_id, "
             "mileage, date. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
@@ -208,8 +212,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_delete",
         annotations=get_annotations("fuel_logs_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete fuel log (DELETE .../fuel_logs/{fuel_log_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete fuel log (DELETE .../fuel_logs/{fuel_log_id}). Requires OAuth/Bearer authorization."
         ),
     )
     async def fuel_logs_delete(

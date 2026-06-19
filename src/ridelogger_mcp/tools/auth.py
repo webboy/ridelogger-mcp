@@ -15,9 +15,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="auth_me",
         annotations=get_annotations("auth_me"),
+        exclude_args=["access_token"],
         description=(
             "[READ] Current user profile and account settings (GET /api/auth/me). "
-            "Requires access_token or HTTP Authorization: Bearer. "
+            "Requires OAuth/Bearer authorization. "
             "Response includes `currency_id` — the user's preferred display/reporting currency — plus country, "
             "fuel consumption unit, name, email, etc. Use this together with monetary log tools: each log row can be "
             "in a different currency, so read `currency_id` from `auth_me`, fetch `ridelogger://reference/currencies`, "

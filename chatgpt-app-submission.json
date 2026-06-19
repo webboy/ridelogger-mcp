@@ -1,0 +1,754 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "RideLogger",
+    "subtitle": "Vehicle logbook tools",
+    "description": "RideLogger helps users manage private vehicle records through ChatGPT: list and update vehicles, track fuel, charging, service, and expense logs, upload vehicle documents and images, and manage maintenance reminders in their authenticated RideLogger account.",
+    "category": "PRODUCTIVITY"
+  },
+  "tools": {
+    "auth_me": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves current user profile and account settings from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "charge_logs_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private charge log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private charge log and does not delete or overwrite existing user data."
+      }
+    },
+    "charge_logs_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing charge log from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing charge log, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "charge_logs_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves charge log from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "charge_logs_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves charge logs from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "charge_logs_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing charge log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing charge log fields in the user's RideLogger account."
+      }
+    },
+    "expense_logs_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private expense log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private expense log and does not delete or overwrite existing user data."
+      }
+    },
+    "expense_logs_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing expense log from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing expense log, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "expense_logs_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves expense log from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "expense_logs_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves expense logs from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "expense_logs_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing expense log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing expense log fields in the user's RideLogger account."
+      }
+    },
+    "fuel_logs_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private fuel log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private fuel log and does not delete or overwrite existing user data."
+      }
+    },
+    "fuel_logs_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing fuel log from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing fuel log, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "fuel_logs_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves fuel log from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "fuel_logs_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves fuel logs from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "fuel_logs_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing fuel log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing fuel log fields in the user's RideLogger account."
+      }
+    },
+    "generic_vehicle_logs_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing vehicle log row from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing vehicle log row, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "generic_vehicle_logs_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle log rows from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "reference_data_refresh": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Refreshes the MCP server's cached RideLogger reference datasets from the API.",
+        "open_world_justification": "Only fetches RideLogger reference data into a private server cache and does not publish public content.",
+        "destructive_justification": "Refreshes cached reference data only and does not delete or overwrite user records."
+      }
+    },
+    "reminder_complete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Marks an existing reminder complete and may advance recurring reminder state.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Irreversibly marks a reminder complete and can advance recurring reminder state."
+      }
+    },
+    "reminder_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private reminder in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private reminder and does not delete or overwrite existing user data."
+      }
+    },
+    "reminder_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing reminder from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing reminder, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "reminder_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves reminders from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "reminder_list_user": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves reminder from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "reminder_show": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves reminder from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "reminder_slots_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves built-in reminder slots from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "reminder_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing reminder in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing reminder fields in the user's RideLogger account."
+      }
+    },
+    "service_logs_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private service log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private service log and does not delete or overwrite existing user data."
+      }
+    },
+    "service_logs_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing service log from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing service log, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "service_logs_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves service log from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "service_logs_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves service logs from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "service_logs_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing service log in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing service log fields in the user's RideLogger account."
+      }
+    },
+    "user_avatar_upload": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Uploads or replaces the authenticated user's profile avatar.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May replace the user's existing profile avatar."
+      }
+    },
+    "vehicle_cabinet_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Uploads a private vehicle cabinet document in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private vehicle cabinet document and does not delete or overwrite existing user data."
+      }
+    },
+    "vehicle_cabinet_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing vehicle cabinet document from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing vehicle cabinet document, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "vehicle_cabinet_download": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle cabinet document from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_cabinet_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle cabinet document from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_cabinet_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle cabinet documents from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_cabinet_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing vehicle cabinet document in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing vehicle cabinet document fields in the user's RideLogger account."
+      }
+    },
+    "vehicle_images_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Uploads a private vehicle gallery image in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private vehicle gallery image and does not delete or overwrite existing user data."
+      }
+    },
+    "vehicle_images_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing vehicle gallery image from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing vehicle gallery image, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "vehicle_images_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle gallery image from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_images_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle gallery images from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_log_files_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing vehicle log attachment from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing vehicle log attachment, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "vehicle_log_files_download": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle log attachment from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_log_files_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle log attachments from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_log_files_upload": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Uploads a private vehicle log attachment in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private vehicle log attachment and does not delete or overwrite existing user data."
+      }
+    },
+    "vehicle_log_files_upload_base64": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Uploads a private vehicle log attachment in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private vehicle log attachment and does not delete or overwrite existing user data."
+      }
+    },
+    "vehicle_plates_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private vehicle plate in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private vehicle plate and does not delete or overwrite existing user data."
+      }
+    },
+    "vehicle_plates_delete": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Deletes an existing vehicle plate from the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Deletes an existing vehicle plate, which may not be recoverable after the API accepts the request."
+      }
+    },
+    "vehicle_plates_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle plates from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicle_plates_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing vehicle plate in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing vehicle plate fields in the user's RideLogger account."
+      }
+    },
+    "vehicles_create": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a private vehicle in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Adds a private vehicle and does not delete or overwrite existing user data."
+      }
+    },
+    "vehicles_get": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicle from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicles_list": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves vehicles from RideLogger and does not change records.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
+      }
+    },
+    "vehicles_update": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Updates an existing vehicle in the authenticated user's RideLogger account.",
+        "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
+        "destructive_justification": "May overwrite existing vehicle fields in the user's RideLogger account."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Review the user's account defaults and available vehicles.",
+      "user_prompt": "Show my RideLogger profile currency and list my vehicles so I can choose which one to work on.",
+      "file_attachment_urls": null,
+      "tools_triggered": "auth_me, vehicles_list",
+      "expected_output": "Returns the user's profile settings and vehicle list with enough detail to choose a vehicle.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Summarize vehicle costs across multi-currency log categories.",
+      "user_prompt": "For vehicle 12, summarize my fuel, charging, service, and expense costs from 2026-01-01 to 2026-03-31 in my preferred currency.",
+      "file_attachment_urls": null,
+      "tools_triggered": "auth_me, fuel_logs_list, charge_logs_list, service_logs_list, expense_logs_list",
+      "expected_output": "Returns category totals and notes that row currencies must be normalized before aggregation.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Create a new fuel log with typed vehicle-log fields.",
+      "user_prompt": "Add a fuel log for vehicle 12: 54.2 liters, 92.10 EUR, mileage 84200, diesel, on 2026-06-18.",
+      "file_attachment_urls": null,
+      "tools_triggered": "fuel_logs_create",
+      "expected_output": "Creates the private fuel log or returns validation details if required reference IDs are missing.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Upload a private vehicle document from a chat attachment.",
+      "user_prompt": "Attach this registration PDF to vehicle 12's cabinet as Registration, issued on 2026-05-01.",
+      "file_attachment_urls": [
+        "https://example.com/sample-registration.pdf"
+      ],
+      "tools_triggered": "vehicle_cabinet_create",
+      "expected_output": "Creates a private cabinet document record linked to the selected vehicle and uploaded file.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Complete an existing reminder after user confirmation.",
+      "user_prompt": "Mark reminder 44 complete for vehicle 12; I confirm this should update the reminder state.",
+      "file_attachment_urls": null,
+      "tools_triggered": "reminder_complete",
+      "expected_output": "Marks the reminder complete and reports the updated reminder state, including any recurring follow-up created by RideLogger.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for appointment booking outside RideLogger.",
+      "user_prompt": "Book me a repair appointment at the nearest mechanic tomorrow at 10 AM.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because RideLogger cannot book external appointments.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for public shopping or price comparison.",
+      "user_prompt": "Find the cheapest winter tires online for my car and buy them.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because shopping, web search, and purchases are outside supported RideLogger workflows.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for unsupported account recovery.",
+      "user_prompt": "Reset my RideLogger password and send me a new login token.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because password resets and login-token issuance are not exposed MCP capabilities.",
+      "expected_output_url": null
+    }
+  ]
+}

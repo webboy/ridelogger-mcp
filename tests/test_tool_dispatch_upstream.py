@@ -140,6 +140,9 @@ def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, A
             "title": "Updated title",
         }
 
+    if tool_name != "reference_data_refresh":
+        args.setdefault("access_token", stub)
+
     return args
 
 

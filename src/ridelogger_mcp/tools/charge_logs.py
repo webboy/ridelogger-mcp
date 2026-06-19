@@ -22,9 +22,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_list",
         annotations=get_annotations("charge_logs_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List charge logs for a vehicle (GET /api/vehicles/{vehicle_id}/charge_logs). "
-            "Requires access_token or HTTP Bearer. Optional page for pagination. "
+            "Requires OAuth/Bearer authorization. Optional page for pagination. "
             "Filters (query params, combined with AND): date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), "
             "currency_id, charge_type_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -64,8 +65,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_create",
         annotations=get_annotations("charge_logs_create"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Create charge log (POST .../charge_logs). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create charge log (POST .../charge_logs). Requires OAuth/Bearer authorization. "
             "ChargeLogStoreRequest: amount, currency_id, mileage, date (Y-m-d); provide energy (kWh) or unit_price. "
             "Optional energy_unit_id, charge_type_id, uuid. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
@@ -122,8 +124,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_get",
         annotations=get_annotations("charge_logs_get"),
+        exclude_args=["access_token"],
         description=(
-            "[READ] Get one charge log (GET .../charge_logs/{charge_log_id}). vehicle_log id. Requires access_token. "
+            "[READ] Get one charge log (GET .../charge_logs/{charge_log_id}). vehicle_log id. Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -147,6 +150,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_update",
         annotations=get_annotations("charge_logs_update"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Update charge log (PUT .../charge_logs/{charge_log_id}). vehicle_log id. "
             "Optional ChargeLogUpdateRequest fields + vehicle log amount, currency_id, mileage, date. "
@@ -205,8 +209,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_delete",
         annotations=get_annotations("charge_logs_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete charge log (DELETE .../charge_logs/{charge_log_id}). vehicle_log id. Requires access_token."
+            "[WRITE] Delete charge log (DELETE .../charge_logs/{charge_log_id}). vehicle_log id. Requires OAuth/Bearer authorization."
         ),
     )
     async def charge_logs_delete(

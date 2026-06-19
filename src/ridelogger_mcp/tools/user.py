@@ -18,10 +18,11 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="user_avatar_upload",
         annotations=get_annotations("user_avatar_upload"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Upload or replace the authenticated user's profile avatar "
             "(POST /api/avatar). "
-            "Requires access_token or HTTP Bearer. "
+            "Requires OAuth/Bearer authorization. "
             "Exactly one of: (1) chat_upload_id — UUID from AI chat attachment "
             "(ai_chat_uploaded_files), (2) file_base64 + file_name. "
             "When using chat_upload_id, the image is taken from the chat upload — "

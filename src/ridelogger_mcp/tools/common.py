@@ -42,8 +42,7 @@ def require_token(access_token: str | None) -> str:
         return bearer
     if not access_token or not str(access_token).strip():
         raise ValueError(
-            "access_token is required (or send Authorization: Bearer on the MCP HTTP request). "
-            "Configure the MCP client OAuth/Bearer connection and retry."
+            "Authorization is required. Configure the MCP client OAuth/Bearer connection and retry."
         )
     return str(access_token).strip()
 
@@ -96,4 +95,3 @@ def tool_error(e: Exception) -> dict[str, Any]:
         "ok": False,
         "error": {"type": "internal", "message": str(e)},
     }
-

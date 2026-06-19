@@ -18,9 +18,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_list",
         annotations=get_annotations("vehicle_images_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List gallery images for a vehicle (GET /api/vehicles/{vehicle_id}/images). "
-            "Requires access_token or HTTP Bearer."
+            "Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_images_list(
@@ -42,9 +43,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_get",
         annotations=get_annotations("vehicle_images_get"),
+        exclude_args=["access_token"],
         description=(
             "[READ] Download one gallery image (GET /api/vehicles/{vehicle_id}/images/{image_id}). "
-            "Requires access_token or HTTP Bearer. Returns JSON with base64, content_type, filename_hint."
+            "Requires OAuth/Bearer authorization. Returns JSON with base64, content_type, filename_hint."
         ),
     )
     async def vehicle_images_get(
@@ -80,9 +82,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_create",
         annotations=get_annotations("vehicle_images_create"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Upload a gallery image (POST /api/vehicles/{vehicle_id}/images). "
-            "Requires access_token or HTTP Bearer. "
+            "Requires OAuth/Bearer authorization. "
             "Exactly one of: (1) chat_upload_id — UUID from AI chat attachment (ai_chat_uploaded_files), "
             "(2) file_base64 + file_name. "
             "When using chat_upload_id, send form field chat_upload_id only (no binary)."
@@ -130,8 +133,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_images_delete",
         annotations=get_annotations("vehicle_images_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete gallery image (DELETE .../images/{image_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete gallery image (DELETE .../images/{image_id}). Requires OAuth/Bearer authorization."
         ),
     )
     async def vehicle_images_delete(

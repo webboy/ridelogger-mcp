@@ -15,6 +15,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_slots_list",
         annotations=get_annotations("reminder_slots_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List built-in reminder slots (GET /api/reminder_slots). "
             "Public reference data: slug, default alarm type, default intervals."
@@ -38,9 +39,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_list",
         annotations=get_annotations("reminder_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List reminders for a vehicle (GET /api/vehicles/{vehicle_id}/reminders). "
-            "Optional status: comma-separated active,passed,canceled,completed. Requires access_token."
+            "Optional status: comma-separated active,passed,canceled,completed. Requires OAuth/Bearer authorization."
         ),
     )
     async def reminder_list(
@@ -65,6 +67,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_list_user",
         annotations=get_annotations("reminder_list_user"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List reminders for the authenticated user across vehicles "
             "(GET /api/user/reminders). Optional status filter."
@@ -91,6 +94,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_show",
         annotations=get_annotations("reminder_show"),
+        exclude_args=["access_token"],
         description="[READ] Get one reminder (GET /api/vehicles/{vehicle_id}/reminders/{reminder_id}).",
     )
     async def reminder_show(
@@ -113,6 +117,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_create",
         annotations=get_annotations("reminder_create"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Create reminder (POST /api/vehicles/{vehicle_id}/reminders). "
             "Built-in slots (reminder_slot_id): 1=Technical inspection, 2=Oil change, "
@@ -164,6 +169,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_update",
         annotations=get_annotations("reminder_update"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Update custom reminder name/description only "
             "(PUT /api/vehicles/{vehicle_id}/reminders/{reminder_id}). Premium custom reminders."
@@ -193,6 +199,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_delete",
         annotations=get_annotations("reminder_delete"),
+        exclude_args=["access_token"],
         description="[WRITE] Delete reminder (DELETE .../reminders/{reminder_id}). Confirmation recommended.",
     )
     async def reminder_delete(
@@ -215,6 +222,7 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_complete",
         annotations=get_annotations("reminder_complete"),
+        exclude_args=["access_token"],
         description=(
             "[WRITE] Mark reminder complete; recurring creates next (POST .../reminders/{reminder_id}/complete)."
         ),

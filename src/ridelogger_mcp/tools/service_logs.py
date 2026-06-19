@@ -22,9 +22,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_list",
         annotations=get_annotations("service_logs_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List service logs for a vehicle (GET /api/vehicles/{vehicle_id}/service_logs). "
-            "Requires access_token or HTTP Bearer. Optional page. "
+            "Requires OAuth/Bearer authorization. Optional page. "
             "Filters: date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), currency_id, service_type_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
@@ -63,8 +64,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_create",
         annotations=get_annotations("service_logs_create"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Create service log (POST .../service_logs). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create service log (POST .../service_logs). Requires OAuth/Bearer authorization. "
             "ServiceLogStoreRequest: amount, currency_id, mileage, service_type_id, title; "
             "plus date (Y-m-d) for vehicle log; optional description, uuid. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
@@ -119,8 +121,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_get",
         annotations=get_annotations("service_logs_get"),
+        exclude_args=["access_token"],
         description=(
-            "[READ] Get one service log (GET .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one service log (GET .../service_logs/{service_log_id}). Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -144,8 +147,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_update",
         annotations=get_annotations("service_logs_update"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Update service log (PUT .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update service log (PUT .../service_logs/{service_log_id}). Requires OAuth/Bearer authorization. "
             "Optional: amount, currency_id, mileage, service_type_id, title, description, date (per API controller). "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -200,8 +204,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="service_logs_delete",
         annotations=get_annotations("service_logs_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete service log (DELETE .../service_logs/{service_log_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete service log (DELETE .../service_logs/{service_log_id}). Requires OAuth/Bearer authorization."
         ),
     )
     async def service_logs_delete(

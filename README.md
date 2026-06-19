@@ -216,7 +216,7 @@ pytest
 
 ## Design notes
 
-- Only `reference_data_refresh` omits user auth; user-data tools require `Authorization: Bearer` on the MCP HTTP request or a non-empty `access_token` parameter for compatible clients.
+- Only `reference_data_refresh` omits user auth; user-data tools require OAuth/Bearer authorization on the MCP HTTP request. A hidden legacy `access_token` argument remains accepted for older non-HTTP clients, but it is excluded from MCP input schemas.
 - Tokens are never logged.
 - Upstream errors are mapped to structured `UpstreamApiError` messages (401/403/404/422/429/5xx hints).
 
@@ -226,16 +226,18 @@ Every tool has explicit FastMCP `annotations` derived from the single source of 
 
 | Annotation | Rule |
 |---|---|
-| `readOnlyHint=True` | Tool has `mutation=False` — reads only, no server-side user data changes |
-| `destructiveHint=True` | Tool has `risk="high"` — irreversible delete operation |
+| `readOnlyHint=True` | Tool only retrieves or computes data and does not change RideLogger or MCP server state |
+| `destructiveHint=True` | Tool can delete, overwrite, replace, or irreversibly advance user data |
 | `idempotentHint=True` | Tool has `idempotency="idempotent"` — safe to repeat with same arguments |
 | `openWorldHint=False` | All tools — operate only on the authenticated user's bounded vehicle data |
 
-**Read tools:** `auth_me`, `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `vehicle_cabinet_list/get/download`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`, `reference_data_refresh`
+**Read-only tools:** `auth_me`, `vehicles_list/get`, `vehicle_plates_list`, `vehicle_images_list/get`, `vehicle_cabinet_list/get/download`, `fuel/charge/service/expense_logs_list/get`, `generic_vehicle_logs_list`, `vehicle_log_files_list/download`, `reminder_slots_list`, `reminder_list/list_user/show`
 
-**Destructive delete tools (11, `destructiveHint=True`):** `fuel/charge/service/expense_logs_delete`, `generic_vehicle_logs_delete`, `vehicle_log_files_delete`, `vehicle_images_delete`, `vehicle_plates_delete`, `reminder_delete`
+**State-changing non-user-data tool:** `reference_data_refresh` refreshes the MCP server's reference cache, so `readOnlyHint=False` even though it does not mutate the user's RideLogger records.
 
-**Write non-destructive:** all `_create`, `_update`, `_upload*`, `reminder_complete`, `user_avatar_upload`, `vehicles_create/update`
+**Destructive tools (`destructiveHint=True`):** delete tools (`fuel/charge/service/expense_logs_delete`, `generic_vehicle_logs_delete`, `vehicle_log_files_delete`, `vehicle_images_delete`, `vehicle_cabinet_delete`, `vehicle_plates_delete`, `reminder_delete`) plus overwrite/replace/status tools (`user_avatar_upload`, `vehicles_update`, `vehicle_plates_update`, `vehicle_cabinet_update`, `fuel/charge/service/expense_logs_update`, `reminder_update`, `reminder_complete`).
+
+**Write non-destructive:** additive create/upload tools such as `vehicles_create`, `vehicle_plates_create`, `vehicle_images_create`, `vehicle_cabinet_create`, `fuel/charge/service/expense_logs_create`, `vehicle_log_files_upload*`, and `reminder_create`.
 
 ### Adding a new tool
 

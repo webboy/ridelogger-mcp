@@ -22,9 +22,10 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_list",
         annotations=get_annotations("expense_logs_list"),
+        exclude_args=["access_token"],
         description=(
             "[READ] List expense logs for a vehicle (GET /api/vehicles/{vehicle_id}/expense_logs). "
-            "Requires access_token or HTTP Bearer. Optional page. "
+            "Requires OAuth/Bearer authorization. Optional page. "
             "Filters: date_from -> `from`, date_to -> `to` (Y-m-d, inclusive), currency_id, expense_type_id. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
@@ -63,8 +64,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_create",
         annotations=get_annotations("expense_logs_create"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Create expense log (POST .../expense_logs). Requires access_token or HTTP Bearer. "
+            "[WRITE] Create expense log (POST .../expense_logs). Requires OAuth/Bearer authorization. "
             "ExpenseLogStoreRequest: amount, currency_id, mileage, expense_type_id, title; "
             "plus date (Y-m-d) for vehicle log; optional description, uuid. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
@@ -119,8 +121,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_get",
         annotations=get_annotations("expense_logs_get"),
+        exclude_args=["access_token"],
         description=(
-            "[READ] Get one expense log (GET .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
+            "[READ] Get one expense log (GET .../expense_logs/{expense_log_id}). Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),
     )
@@ -144,8 +147,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_update",
         annotations=get_annotations("expense_logs_update"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Update expense log (PUT .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer. "
+            "[WRITE] Update expense log (PUT .../expense_logs/{expense_log_id}). Requires OAuth/Bearer authorization. "
             "Optional: amount, currency_id, mileage, expense_type_id (ExpenseLogUpdateRequest); "
             "optional title, description, date (controller merges vehicle log + expense row). "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
@@ -201,8 +205,9 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_delete",
         annotations=get_annotations("expense_logs_delete"),
+        exclude_args=["access_token"],
         description=(
-            "[WRITE] Delete expense log (DELETE .../expense_logs/{expense_log_id}). Requires access_token or HTTP Bearer."
+            "[WRITE] Delete expense log (DELETE .../expense_logs/{expense_log_id}). Requires OAuth/Bearer authorization."
         ),
     )
     async def expense_logs_delete(
