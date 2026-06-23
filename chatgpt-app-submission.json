@@ -3,9 +3,9 @@
   "schema_version": 1,
   "app_info": {
     "display_name": "RideLogger",
-    "subtitle": "Vehicle logbook tools",
-    "description": "RideLogger helps users manage private vehicle records through ChatGPT: list and update vehicles, track fuel, charging, service, and expense logs, upload vehicle documents and images, and manage maintenance reminders in their authenticated RideLogger account.",
-    "category": "PRODUCTIVITY"
+    "subtitle": "Track vehicle maintenance",
+    "description": "RideLogger helps users manage their private vehicle logbook through ChatGPT. Users can view and update vehicles, track fuel, charging, service, and expense records, manage maintenance reminders, and store vehicle images, documents, and log attachments in their authenticated RideLogger account.",
+    "category": "LIFESTYLE"
   },
   "tools": {
     "auth_me": {
@@ -700,10 +700,10 @@
     },
     {
       "description": "Create a new fuel log with typed vehicle-log fields.",
-      "user_prompt": "Add a fuel log for vehicle 12: 54.2 liters, 92.10 EUR, mileage 84200, diesel, on 2026-06-18.",
+      "user_prompt": "Add a fuel log for vehicle 12: quantity 54.2, amount 92.10, currency ID 1, mileage 84200, fuel type ID 2, on 2026-06-18.",
       "file_attachment_urls": null,
       "tools_triggered": "fuel_logs_create",
-      "expected_output": "Creates the private fuel log or returns validation details if required reference IDs are missing.",
+      "expected_output": "Creates the private fuel log and returns the saved record with its resolved fuel type, quantity unit, and currency details.",
       "expected_output_url": null
     },
     {
