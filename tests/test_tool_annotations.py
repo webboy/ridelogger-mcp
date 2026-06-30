@@ -153,3 +153,52 @@ def test_list_tools_destructive_tools_correct() -> None:
     for name in destructive_samples:
         t = tool_map[name]
         assert t.annotations.destructiveHint is True, f"{name}: expected destructiveHint=True"
+
+
+def _tool_parameters(tool_name: str) -> dict:
+    from ridelogger_mcp.app import mcp
+
+    tools = asyncio.run(mcp.list_tools())
+    tool_map = {t.name: t for t in tools}
+    return tool_map[tool_name].parameters
+
+
+def test_openai_schema_hardening_for_vehicle_plate_dates_and_uuid() -> None:
+    """OpenAI review flags unconstrained plate date/uuid strings as unclear."""
+    create_params = _tool_parameters("vehicle_plates_create")
+    update_params = _tool_parameters("vehicle_plates_update")
+
+    date_pattern = r"^\d{4}-\d{2}-\d{2}$"
+    uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+
+    for params in (create_params, update_params):
+        props = params["properties"]
+        assert props["valid_from"]["pattern"] == date_pattern
+        assert props["valid_to"]["pattern"] == date_pattern
+
+    assert create_params["properties"]["uuid"]["pattern"] == uuid_pattern
+
+
+def test_openai_schema_hardening_for_charge_log_create() -> None:
+    """Charge create must not describe required energy while leaving it optional."""
+    params = _tool_parameters("charge_logs_create")
+
+    assert "energy" in params["required"]
+    assert params["properties"]["date"]["pattern"] == r"^\d{4}-\d{2}-\d{2}$"
+    assert "pattern" in params["properties"]["uuid"]["anyOf"][0]
+
+
+def test_openai_schema_hardening_for_reminder_filters_and_create() -> None:
+    """Reminder status/alarm fields need explicit enum/date contract for OpenAI scan."""
+    status_values = ["active", "passed", "canceled", "completed"]
+
+    for tool_name in ("reminder_list", "reminder_list_user"):
+        params = _tool_parameters(tool_name)
+        assert params["properties"]["status"]["anyOf"][0]["enum"] == status_values
+
+    params = _tool_parameters("reminder_create")
+    props = params["properties"]
+    assert props["alarm_type_id"]["enum"] == [1, 2, 3]
+    assert props["reminder_slot_id"]["anyOf"][0]["enum"] == [1, 2, 3, 4, 5]
+    assert props["interval_mileage_unit_id"]["anyOf"][0]["enum"] == [1, 2]
+    assert props["target_date"]["anyOf"][0]["pattern"] == r"^\d{4}-\d{2}-\d{2}$"

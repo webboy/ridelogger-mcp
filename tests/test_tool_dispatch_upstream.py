@@ -26,6 +26,11 @@ def _coerce_leaf(schema_fragment: dict[str, Any]) -> Any:
         return schema_fragment["const"]
     if isinstance(schema_fragment.get("enum"), list) and schema_fragment["enum"]:
         return schema_fragment["enum"][0]
+    pattern = schema_fragment.get("pattern")
+    if pattern == r"^\d{4}-\d{2}-\d{2}$":
+        return "2026-06-30"
+    if pattern == r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$":
+        return "550e8400-e29b-41d4-a716-446655440000"
     opts = schema_fragment.get("anyOf")
     if isinstance(opts, list):
         for opt in opts:

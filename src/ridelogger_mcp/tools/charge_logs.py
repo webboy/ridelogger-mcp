@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
 from fastmcp import FastMCP
+from pydantic import Field
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
@@ -16,6 +17,23 @@ from ridelogger_mcp.tools.common import (
     require_token,
     tool_error,
 )
+
+LogDate = Annotated[
+    str,
+    Field(
+        description="Log date in YYYY-MM-DD format, e.g. 2026-06-30.",
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+    ),
+]
+
+OptionalSyncUuid = Annotated[
+    str | None,
+    Field(
+        default=None,
+        description="Optional client-generated UUID for offline sync, e.g. 550e8400-e29b-41d4-a716-446655440000.",
+        pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    ),
+]
 
 
 def register(mcp: FastMCP) -> None:
@@ -68,7 +86,8 @@ def register(mcp: FastMCP) -> None:
         exclude_args=["access_token"],
         description=(
             "[WRITE] Create charge log (POST .../charge_logs). Requires OAuth/Bearer authorization. "
-            "ChargeLogStoreRequest: amount, currency_id, mileage, date (Y-m-d); provide energy (kWh) or unit_price. "
+            "ChargeLogStoreRequest: amount, currency_id, mileage, date (YYYY-MM-DD), and energy are required. "
+            "Provide energy in kWh; optional unit_price can be included when known, otherwise the API computes it from amount / energy. "
             "Optional energy_unit_id, charge_type_id, uuid. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -79,12 +98,12 @@ def register(mcp: FastMCP) -> None:
         amount: float,
         currency_id: int,
         mileage: int,
-        date: str,
-        energy: float | None = None,
+        date: LogDate,
+        energy: Annotated[float, Field(description="Charging energy in kWh. Required for create calls.")],
         unit_price: float | None = None,
         energy_unit_id: int | None = None,
         charge_type_id: int | None = None,
-        uuid: str | None = None,
+        uuid: OptionalSyncUuid = None,
         business_name: str | None = None,
         business_address: str | None = None,
         latitude: float | None = None,

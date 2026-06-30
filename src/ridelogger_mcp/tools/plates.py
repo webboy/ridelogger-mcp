@@ -2,13 +2,34 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
+
+from pydantic import Field
 
 from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error
+
+PlateDate = Annotated[
+    str,
+    Field(
+        description="Plate validity date in YYYY-MM-DD format, e.g. 2026-12-31.",
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+    ),
+]
+
+PlateUuid = Annotated[
+    str,
+    Field(
+        description=(
+            "Client-supplied stable unique identifier for the plate record. "
+            "Use a UUID string such as 550e8400-e29b-41d4-a716-446655440000."
+        ),
+        pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    ),
+]
 
 
 def register(mcp: FastMCP) -> None:
@@ -43,16 +64,17 @@ def register(mcp: FastMCP) -> None:
         exclude_args=["access_token"],
         description=(
             "[WRITE] Create plate (POST .../vehicle_plates). Requires OAuth/Bearer authorization. "
-            "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid."
+            "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid. "
+            "Use YYYY-MM-DD for valid_from and valid_to; uuid must be a UUID string."
         ),
     )
     async def vehicle_plates_create(
         vehicle_id: int,
         plate: str,
         country_id: int,
-        valid_from: str,
-        valid_to: str,
-        uuid: str,
+        valid_from: PlateDate,
+        valid_to: PlateDate,
+        uuid: PlateUuid,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
@@ -81,7 +103,8 @@ def register(mcp: FastMCP) -> None:
         exclude_args=["access_token"],
         description=(
             "[WRITE] Update plate (PUT .../vehicle_plates/{plate_id}). Requires OAuth/Bearer authorization. "
-            "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to."
+            "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to. "
+            "Use YYYY-MM-DD for valid_from and valid_to."
         ),
     )
     async def vehicle_plates_update(
@@ -89,8 +112,8 @@ def register(mcp: FastMCP) -> None:
         plate_id: int,
         plate: str,
         country_id: int,
-        valid_from: str,
-        valid_to: str,
+        valid_from: PlateDate,
+        valid_to: PlateDate,
         access_token: str | None = None,
     ) -> dict[str, Any]:
         try:
