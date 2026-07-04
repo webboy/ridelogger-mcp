@@ -111,12 +111,20 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 ## MCP tools (full catalog)
 
+**56 tools.** Full catalog with read/write/destructive classification: **[`docs/FEATURES.md`](docs/FEATURES.md)**. Architecture details: **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)**.
+
 **Auth:** MCP discovery requests (`initialize`, `tools/list`, `resources/list`) are public so ChatGPT/OpenAI Platform and other clients can scan the server. User-data tool calls require OAuth/Bearer and should send `Authorization: Bearer <token>` on MCP HTTP requests. The tool-call middleware validates the token via `/api/auth/me`. No username/password auth tools are exposed.
 
 | Tool | Token | Description |
 |------|-------|-------------|
 | `auth_me` | yes | GET `/api/auth/me` — profile and `currency_id` (display currency). No username/password login tool is exposed. |
 | `reference_data_refresh` | no | Reload all cached reference datasets from the API. |
+
+**User profile**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `user_avatar_upload` | yes | POST `/api/avatar` — upload/replace profile avatar (`chat_upload_id` or base64). |
 
 **Vehicles**
 
@@ -145,6 +153,17 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `vehicle_images_create` | yes | Upload image — multipart / chat_upload_id per API. |
 | `vehicle_images_delete` | yes | Delete image. |
 
+**Vehicle cabinet (private documents)**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `vehicle_cabinet_list` | yes | GET `.../vehicles/{id}/cabinet-documents`. |
+| `vehicle_cabinet_get` | yes | Get one document's metadata. |
+| `vehicle_cabinet_download` | yes | Download document bytes. |
+| `vehicle_cabinet_create` | yes | Upload a cabinet document. |
+| `vehicle_cabinet_update` | yes | Update document metadata/file. |
+| `vehicle_cabinet_delete` | yes | Delete document. |
+
 **Fuel logs** (multi-currency — see tool description for `currency_id` / aggregation)
 
 | Tool | Token | Description |
@@ -154,6 +173,16 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `fuel_logs_get` | yes | GET one log. |
 | `fuel_logs_update` | yes | PUT — optional typed fields (FuelLogUpdateRequest + vehicle log fields). |
 | `fuel_logs_delete` | yes | DELETE. |
+
+**Charge logs** (multi-currency, EV charging)
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `charge_logs_list` | yes | GET `.../vehicles/{id}/charge_logs`. |
+| `charge_logs_create` | yes | POST — typed body (ChargeLogStoreRequest: amount, currency_id, mileage, date, energy). |
+| `charge_logs_get` | yes | GET one log. |
+| `charge_logs_update` | yes | PUT — optional typed fields. |
+| `charge_logs_delete` | yes | DELETE. |
 
 **Service logs** (multi-currency)
 
@@ -186,6 +215,19 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `vehicle_log_files_upload_base64` | yes | Upload via JSON using `chat_upload_id` or base64 file + name. The API may return 403 if the log has reached its attachment limit. |
 | `vehicle_log_files_delete` | yes | Delete attachment. |
 | `vehicle_log_files_download` | yes | Download attachment bytes. |
+
+**Reminders**
+
+| Tool | Token | Description |
+|------|-------|-------------|
+| `reminder_slots_list` | yes | GET `/api/reminder_slots` — built-in slots (public reference data, but the tool still requires authorization). |
+| `reminder_list` | yes | GET `.../vehicles/{id}/reminders` — optional status filter (active/passed/canceled/completed). |
+| `reminder_list_user` | yes | GET `/api/user/reminders` — reminders across all vehicles. |
+| `reminder_show` | yes | GET one reminder. |
+| `reminder_create` | yes | POST — prefer built-in slots (inspection, oil, tire swaps, brakes) via `reminder_slot_id`. |
+| `reminder_update` | yes | PUT — custom reminder name/description only. |
+| `reminder_delete` | yes | DELETE. |
+| `reminder_complete` | yes | POST `.../complete` — mark complete; recurring creates next occurrence. |
 
 Create/update tools expose **explicit parameters**; shapes match **ridelogger-api** FormRequest classes (see `list_tools` → `inputSchema`). Scribe docs on `sk-api` remain the human-readable reference.
 
@@ -247,5 +289,3 @@ Every tool has explicit FastMCP `annotations` derived from the single source of 
 2. Add the name to `REGISTERED_TOOL_NAMES`.
 3. Add `annotations=get_annotations("tool_name")` to the `@mcp.tool()` decorator.
 4. Run `pytest tests/test_tool_annotations.py` — it will fail if step 1 or 2 is missing.
-
-Claude AI: tB79C85hTLnh7G03lUHLrWhsEXaZGcgZfiQFaub2
