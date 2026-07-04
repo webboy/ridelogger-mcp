@@ -10,7 +10,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error
+from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error, tool_success
 
 PlateDate = Annotated[
     str,
@@ -54,7 +54,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/vehicle_plates",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -93,7 +93,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -131,7 +131,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -156,6 +156,6 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/vehicle_plates/{plate_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)

@@ -34,6 +34,38 @@ LOG_REFS_HINT = (
 from ridelogger_mcp.errors import UpstreamApiError
 from ridelogger_mcp.logging_setup import new_request_id
 
+_MINIMIZED_KEY_NAMES = {
+    "access_token",
+    "api_token",
+    "avatar",
+    "created_at",
+    "deleted_at",
+    "device_id",
+    "email",
+    "first_name",
+    "invited_by_user_id",
+    "ip",
+    "last_name",
+    "owner_id",
+    "password",
+    "refresh_token",
+    "request_id",
+    "run_id",
+    "secret",
+    "session_id",
+    "token",
+    "trace_id",
+    "updated_at",
+    "user_agent",
+    "user_id",
+    "uuid",
+}
+
+_MINIMIZED_KEY_SUFFIXES = (
+    "_token",
+    "_secret",
+)
+
 
 def require_token(access_token: str | None) -> str:
     new_request_id()
@@ -74,6 +106,34 @@ def compact_query_params(values: dict[str, Any]) -> dict[str, Any] | None:
     """Build GET query dict: drop None values; return None if empty (caller may pass through to HTTP client)."""
     out = {k: v for k, v in values.items() if v is not None}
     return out or None
+
+
+def sanitize_tool_data(data: Any) -> Any:
+    """Remove personal/internal identifiers from MCP tool responses.
+
+    The API is broader than ChatGPT needs. MCP responses should keep useful
+    domain fields and record ids needed for follow-up tool calls, while dropping
+    user identifiers, auth/session/debug fields, sync UUIDs, and internal
+    timestamps that are not necessary for answering user requests.
+    """
+    if isinstance(data, list):
+        return [sanitize_tool_data(item) for item in data]
+    if not isinstance(data, dict):
+        return data
+
+    out: dict[str, Any] = {}
+    for key, value in data.items():
+        normalized_key = str(key).lower()
+        if normalized_key in _MINIMIZED_KEY_NAMES:
+            continue
+        if any(normalized_key.endswith(suffix) for suffix in _MINIMIZED_KEY_SUFFIXES):
+            continue
+        out[key] = sanitize_tool_data(value)
+    return out
+
+
+def tool_success(data: Any = None) -> dict[str, Any]:
+    return {"ok": True, "data": sanitize_tool_data(data)}
 
 
 def tool_error(e: Exception) -> dict[str, Any]:

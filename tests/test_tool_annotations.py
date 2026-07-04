@@ -155,6 +155,30 @@ def test_list_tools_destructive_tools_correct() -> None:
         assert t.annotations.destructiveHint is True, f"{name}: expected destructiveHint=True"
 
 
+def test_list_tools_descriptions_do_not_use_commerce_language() -> None:
+    """OpenAI app review disallows digital subscription/upsell language in tool metadata."""
+    from ridelogger_mcp.app import mcp
+
+    forbidden_terms = (
+        "premium",
+        "subscription",
+        "upgrade",
+        "checkout",
+        "payment",
+        "stripe",
+        "paypal",
+    )
+
+    tools = asyncio.run(mcp.list_tools())
+    offenders = [
+        t.name
+        for t in tools
+        if any(term in (t.description or "").lower() for term in forbidden_terms)
+    ]
+
+    assert not offenders, f"Tool descriptions contain commerce language: {offenders}"
+
+
 def _tool_parameters(tool_name: str) -> dict:
     from ridelogger_mcp.app import mcp
 

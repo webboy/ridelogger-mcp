@@ -9,7 +9,7 @@ from pydantic import Field
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import body_from_kwargs, compact_query_params, require_token, tool_error
+from ridelogger_mcp.tools.common import body_from_kwargs, compact_query_params, require_token, tool_error, tool_success
 
 ReminderStatus = Literal["active", "passed", "canceled", "completed"]
 AlarmTypeId = Literal[1, 2, 3]
@@ -46,7 +46,7 @@ def register(mcp: FastMCP) -> None:
                 "/reminder_slots",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -74,7 +74,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 params=params,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -101,7 +101,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 params=params,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -124,7 +124,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/reminders/{reminder_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -136,9 +136,8 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Create reminder (POST /api/vehicles/{vehicle_id}/reminders). "
             "Built-in slots (reminder_slot_id): 1=Technical inspection, 2=Oil change, "
             "3=Tire swap (summer), 4=Tire swap (winter), 5=Brake check. "
-            "ALWAYS use a matching slot when the user's request fits one of these 5 categories — "
-            "free users can only create slot-based reminders (up to 3 active per vehicle). "
-            "Custom reminders (omit reminder_slot_id, set name) require Premium. "
+            "ALWAYS use a matching slot when the user's request fits one of these 5 categories. "
+            "Custom reminders may not be available for every account; if unavailable, the API returns a permission error. "
             "alarm_type_id: 1=DATE requires target_date, 2=MILEAGE requires target_mileage, "
             "3=ANY requires both target_date and target_mileage. "
             "Optional interval_* for recurring."
@@ -187,7 +186,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
     @mcp.tool(
@@ -196,7 +195,7 @@ def register(mcp: FastMCP) -> None:
         exclude_args=["access_token"],
         description=(
             "[WRITE] Update custom reminder name/description only "
-            "(PUT /api/vehicles/{vehicle_id}/reminders/{reminder_id}). Premium custom reminders."
+            "(PUT /api/vehicles/{vehicle_id}/reminders/{reminder_id})."
         ),
     )
     async def reminder_update(
@@ -216,7 +215,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
     @mcp.tool(
@@ -238,7 +237,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/reminders/{reminder_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
     @mcp.tool(
@@ -262,7 +261,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/reminders/{reminder_id}/complete",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 

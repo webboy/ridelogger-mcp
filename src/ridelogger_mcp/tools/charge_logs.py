@@ -16,6 +16,7 @@ from ridelogger_mcp.tools.common import (
     compact_query_params,
     require_token,
     tool_error,
+    tool_success,
 )
 
 LogDate = Annotated[
@@ -76,7 +77,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 params=params,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -136,7 +137,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -162,7 +163,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/charge_logs/{charge_log_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -221,7 +222,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -246,6 +247,6 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/charge_logs/{charge_log_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)

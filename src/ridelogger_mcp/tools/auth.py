@@ -8,7 +8,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import require_token, tool_error
+from ridelogger_mcp.tools.common import require_token, tool_error, tool_success
 
 
 def register(mcp: FastMCP) -> None:
@@ -19,8 +19,8 @@ def register(mcp: FastMCP) -> None:
         description=(
             "[READ] Current user profile and account settings (GET /api/auth/me). "
             "Requires OAuth/Bearer authorization. "
-            "Response includes `currency_id` — the user's preferred display/reporting currency — plus country, "
-            "fuel consumption unit, name, email, etc. Use this together with monetary log tools: each log row can be "
+            "Response includes settings such as `currency_id` — the user's preferred display/reporting currency — "
+            "plus country and fuel consumption unit. Use this together with monetary log tools: each log row can be "
             "in a different currency, so read `currency_id` from `auth_me`, fetch `ridelogger://reference/currencies`, "
             "convert row amounts to one currency, then aggregate. "
             "Errors: 401 if token missing/expired."
@@ -31,6 +31,6 @@ def register(mcp: FastMCP) -> None:
             token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json("GET", "/auth/me", token=token)
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)

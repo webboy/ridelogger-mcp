@@ -11,7 +11,7 @@ from fastmcp import FastMCP
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import require_token, tool_error
+from ridelogger_mcp.tools.common import require_token, tool_error, tool_success
 
 
 def register(mcp: FastMCP) -> None:
@@ -36,7 +36,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/images",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -126,7 +126,7 @@ def register(mcp: FastMCP) -> None:
                 )
             raise_for_status(resp)
             data = resp.json() if resp.content else None
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -151,6 +151,6 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/images/{image_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)

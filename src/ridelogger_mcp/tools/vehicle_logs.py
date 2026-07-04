@@ -18,6 +18,7 @@ from ridelogger_mcp.tools.common import (
     compact_query_params,
     require_token,
     tool_error,
+    tool_success,
 )
 
 
@@ -57,7 +58,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 params=params,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -83,7 +84,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -109,7 +110,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/get_files",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -121,8 +122,8 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
             "Requires OAuth/Bearer authorization. Exactly one of: chat_upload_id (AI chat attachment UUID), "
             "or file_base64 + file_name. "
-            "Non-premium users: at most one attachment per vehicle log; if one already exists, API returns 403 "
-            "(remove it with vehicle_log_files_delete or use a premium account). Premium: multiple attachments allowed."
+            "Some accounts allow a limited number of attachments per vehicle log; if the limit is reached, "
+            "the API returns 403. Remove an existing attachment before retrying."
         ),
     )
     async def vehicle_log_files_upload(
@@ -161,7 +162,7 @@ def register(mcp: FastMCP) -> None:
                 )
             raise_for_status(resp)
             data = resp.json() if resp.content else None
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -174,8 +175,8 @@ def register(mcp: FastMCP) -> None:
             "Requires OAuth/Bearer authorization. "
             "Either chat_upload_id (AI chat attachment UUID), or vehicle_log_file (base64) + vehicle_log_file_name — "
             "mutually exclusive. "
-            "Non-premium: max one file per log (403 if a file is already attached; delete first or upgrade). "
-            "Premium: multiple allowed."
+            "Some accounts allow a limited number of attachments per log; if the limit is reached, "
+            "delete an existing attachment before retrying."
         ),
     )
     async def vehicle_log_files_upload_base64(
@@ -206,7 +207,7 @@ def register(mcp: FastMCP) -> None:
                 token=token,
                 json_body=body,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 
@@ -232,7 +233,7 @@ def register(mcp: FastMCP) -> None:
                 f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/delete_files/{uuid}",
                 token=token,
             )
-            return {"ok": True, "data": data}
+            return tool_success(data)
         except Exception as e:
             return tool_error(e)
 

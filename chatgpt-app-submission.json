@@ -739,7 +739,7 @@
       "user_prompt": "Find the cheapest winter tires online for my car and buy them.",
       "file_attachment_urls": null,
       "tools_triggered": null,
-      "expected_output": "The app should not be invoked because shopping, web search, and purchases are outside supported RideLogger workflows.",
+      "expected_output": "The app should not be invoked because shopping, web search, and non-vehicle workflows are outside supported RideLogger workflows.",
       "expected_output_url": null
     },
     {
