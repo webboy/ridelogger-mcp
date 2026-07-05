@@ -50,11 +50,15 @@ def raise_for_status(resp: httpx.Response) -> None:
     msg = _extract_message(body) if isinstance(body, dict) else None
     if not msg:
         msg = resp.reason_phrase or f"HTTP {resp.status_code}"
+    if resp.status_code == 402:
+        # Upstream 402 bodies contain account-tier/upsell wording; never
+        # forward that to MCP clients — keep the limit message neutral.
+        msg = "This action exceeds a limit on the current account."
     hint = ""
     if resp.status_code == 401:
         hint = " Token may be expired or invalid; reconnect or reauthorize the MCP client."
     elif resp.status_code == 402:
-        hint = " This action is not available for the current account."
+        hint = " The request cannot be completed for this account."
     elif resp.status_code == 403:
         hint = " You may lack permission for this vehicle or action."
     elif resp.status_code == 404:

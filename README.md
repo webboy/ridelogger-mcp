@@ -117,7 +117,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 | Tool | Token | Description |
 |------|-------|-------------|
-| `auth_me` | yes | GET `/api/auth/me` — profile and `currency_id` (display currency). No username/password login tool is exposed. |
+| `auth_me` | yes | GET `/api/auth/me` — account settings only (settings allowlist incl. `currency_id` display currency; no profile identity fields). No username/password login tool is exposed. |
 | `reference_data_refresh` | no | Reload all cached reference datasets from the API. |
 
 **User profile**

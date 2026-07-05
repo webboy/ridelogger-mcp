@@ -24,7 +24,7 @@ All tools have `openWorldHint=False` (bounded user data). All tools except `refe
 
 | Tool | Purpose | Class |
 |---|---|---|
-| `auth_me` | Current user profile and account settings (GET `/api/auth/me`), incl. preferred `currency_id` for multi-currency aggregation | Read |
+| `auth_me` | Current account settings only (GET `/api/auth/me`, reduced to a settings allowlist), incl. preferred `currency_id` for multi-currency aggregation. No profile identity fields (name/email/phone/address/tier) are returned | Read |
 
 No username/password login tools are exposed — authentication happens via the MCP client's OAuth/Bearer flow.
 
@@ -146,7 +146,7 @@ No username/password login tools are exposed — authentication happens via the 
 
 | Tool | Purpose | Class |
 |---|---|---|
-| `reference_data_refresh` | Reload all cached reference datasets from the API (no token) | Read semantics (`mutation=False`), but `readOnlyHint=False` — it mutates the MCP server's cache |
+| `reference_data_refresh` | Reload all cached reference datasets from the API (no token) | Described as `[WRITE]` with `readOnlyHint=False` — it mutates the MCP server's cache (never user records); internal semantics stay `mutation=False` |
 
 ## MCP resources (15)
 

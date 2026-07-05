@@ -111,7 +111,7 @@ Canonical string (newline-joined): `METHOD \n request-target(path?query) \n time
 
 ### Error mapping (`errors.py`)
 
-`raise_for_status()` converts non-2xx responses into `UpstreamApiError(status_code, message, body)`. The message combines the upstream `message`/`errors` payload with an actionable hint per status (401 reauthorize, 402 not available for account, 403 permission, 404 check ids, 422 validation, 429 rate limit, 5xx retry). `tools/common.tool_error()` turns these into structured `{"ok": false, "error": {...}}` results, including Laravel field errors when present.
+`raise_for_status()` converts non-2xx responses into `UpstreamApiError(status_code, message, body)`. The message combines the upstream `message`/`errors` payload with an actionable hint per status (401 reauthorize, 403 permission, 404 check ids, 422 validation, 429 rate limit, 5xx retry). For 402 the upstream body is never forwarded — the message is replaced with a neutral account-limit sentence (upstream 402 bodies contain account-tier/upsell wording that must not reach MCP clients). `tools/common.tool_error()` turns these into structured `{"ok": false, "error": {...}}` results, including Laravel field errors when present.
 
 ## Reference cache and resources
 

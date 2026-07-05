@@ -15,7 +15,7 @@
         "destructiveHint": false
       },
       "justifications": {
-        "read_only_justification": "Only retrieves current user profile and account settings from RideLogger and does not change records.",
+        "read_only_justification": "Only retrieves the user's account settings (preferred currency, country, units, selected vehicle) from RideLogger and does not change records. No profile identity fields are returned.",
         "open_world_justification": "Operates within the authenticated user's private RideLogger account and does not publish public internet content.",
         "destructive_justification": "Does not delete, overwrite, revoke access, or perform irreversible actions."
       }
@@ -684,10 +684,10 @@
   "test_cases": [
     {
       "description": "Review the user's account defaults and available vehicles.",
-      "user_prompt": "Show my RideLogger profile currency and list my vehicles so I can choose which one to work on.",
+      "user_prompt": "Show my RideLogger preferred currency and list my vehicles so I can choose which one to work on.",
       "file_attachment_urls": null,
       "tools_triggered": "auth_me, vehicles_list",
-      "expected_output": "Returns the user's profile settings and vehicle list with enough detail to choose a vehicle.",
+      "expected_output": "Returns the user's account settings (preferred currency, units) and vehicle list with enough detail to choose a vehicle. No personal identity fields are included.",
       "expected_output_url": null
     },
     {

@@ -36,9 +36,11 @@ from ridelogger_mcp.logging_setup import new_request_id
 
 _MINIMIZED_KEY_NAMES = {
     "access_token",
+    "address",
     "api_token",
     "avatar",
     "created_at",
+    "created_by",
     "deleted_at",
     "device_id",
     "email",
@@ -46,8 +48,11 @@ _MINIMIZED_KEY_NAMES = {
     "invited_by_user_id",
     "ip",
     "last_name",
+    "marketing_consent",
     "owner_id",
     "password",
+    "phone",
+    "premium",
     "refresh_token",
     "request_id",
     "run_id",
@@ -55,9 +60,12 @@ _MINIMIZED_KEY_NAMES = {
     "session_id",
     "token",
     "trace_id",
+    "unsubscribed_at",
     "updated_at",
+    "updated_by",
     "user_agent",
     "user_id",
+    "username",
     "uuid",
 }
 

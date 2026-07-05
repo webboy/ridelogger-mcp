@@ -17,7 +17,9 @@ def register(mcp: FastMCP) -> None:
         name="reference_data_refresh",
         annotations=get_annotations("reference_data_refresh"),
         description=(
-            "[READ] Reload all cached reference datasets from the API (countries, currencies, etc.). "
+            "[WRITE] Reload the MCP server's cached reference datasets from the RideLogger API "
+            "(countries, currencies, etc.). This changes only the server-side cache state — it never reads or "
+            "modifies any user records. "
             "The `currencies` dataset is needed to convert monetary log rows (each has `currency_id`) to a single "
             "display currency — typically the user's `currency_id` from `auth_me`. "
             "Does not require user authorization. Use after TTL or when data seems stale."

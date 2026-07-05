@@ -155,6 +155,28 @@ def test_list_tools_destructive_tools_correct() -> None:
         assert t.annotations.destructiveHint is True, f"{name}: expected destructiveHint=True"
 
 
+def test_list_tools_description_prefix_matches_read_only_hint() -> None:
+    """[READ]/[WRITE] description prefix must agree with readOnlyHint (OpenAI review checks this)."""
+    from ridelogger_mcp.app import mcp
+
+    tools = asyncio.run(mcp.list_tools())
+    mismatches = []
+    for t in tools:
+        desc = t.description or ""
+        if desc.startswith("[READ]"):
+            expected = True
+        elif desc.startswith("[WRITE]"):
+            expected = False
+        else:
+            mismatches.append(f"{t.name}: description missing [READ]/[WRITE] prefix")
+            continue
+        if t.annotations.readOnlyHint is not expected:
+            mismatches.append(
+                f"{t.name}: prefix says readOnly={expected} but readOnlyHint={t.annotations.readOnlyHint}"
+            )
+    assert not mismatches, "; ".join(mismatches)
+
+
 def test_list_tools_descriptions_do_not_use_commerce_language() -> None:
     """OpenAI app review disallows digital subscription/upsell language in tool metadata."""
     from ridelogger_mcp.app import mcp
