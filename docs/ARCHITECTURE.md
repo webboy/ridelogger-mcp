@@ -148,7 +148,7 @@ All settings via pydantic-settings (`.env` file or environment; extra vars ignor
 | `SK_API_URL` | — (**required**) | Upstream API base URL; `/api` suffix appended if missing |
 | `REFERENCE_CACHE_TTL_SECONDS` | `3600` | Reference dataset refresh interval |
 | `HTTP_TIMEOUT_S` | `30.0` | Upstream HTTP timeout |
-| `HTTP_MAX_RETRIES` | `2` | Declared retry budget (note: `get_public_json` uses a fixed tenacity policy of 3 attempts; this setting is not currently read elsewhere) |
+| `HTTP_MAX_RETRIES` | `2` | Retry budget for `get_public_json` (attempts = value + 1; default 3 attempts) |
 | `API_CONSUMER_CODE` | `mcp` | `X-Api-Consumer` header value |
 | `API_CONSUMER_KEY_ID` | `""` | HMAC public key id; signing off when empty |
 | `API_CONSUMER_SECRET` | `""` | HMAC signing secret; signing off when empty |

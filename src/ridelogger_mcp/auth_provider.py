@@ -27,7 +27,11 @@ OAUTH_SCOPES: list[str] = [
 
 
 class RideLoggerTokenVerifier(TokenVerifier):
-    """Validate OAuth bearer tokens against the RideLogger API."""
+    """Validate OAuth bearer tokens against the RideLogger API.
+
+    Used by ``create_auth_provider()`` for a future FastMCP-native auth path; production
+    bearer enforcement is in ``bearer_auth.RideLoggerBearerMiddleware``.
+    """
 
     @property
     def scopes_supported(self) -> list[str]:
@@ -65,7 +69,11 @@ class RideLoggerTokenVerifier(TokenVerifier):
 
 
 def create_auth_provider() -> RemoteAuthProvider:
-    """Create FastMCP auth provider without requiring full app settings at import time."""
+    """Create FastMCP auth provider without requiring full app settings at import time.
+
+    Reserved for a future switch to FastMCP-native ``auth=`` wiring. Production uses
+    ``RideLoggerBearerMiddleware`` plus custom ``/.well-known/oauth-protected-resource`` routes.
+    """
 
     authorization_server = os.getenv("OAUTH_AUTHORIZATION_SERVER", "https://api.ridelogger.com")
     resource_url = os.getenv("OAUTH_RESOURCE_URL", "https://mcp.ridelogger.com/mcp")

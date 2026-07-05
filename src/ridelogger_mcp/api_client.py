@@ -11,7 +11,7 @@ from typing import Any
 
 import httpx
 from tenacity import (
-    retry,
+    AsyncRetrying,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
@@ -175,14 +175,16 @@ class ApiClient:
         raise_for_status(resp)
         return resp.content, resp.headers
 
-    @retry(
-        retry=retry_if_exception_type((httpx.TimeoutException, httpx.NetworkError)),
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=0.5, min=0.5, max=4),
-        reraise=True,
-    )
     async def get_public_json(self, path: str) -> Any:
         """GET without auth — used for reference data preload."""
-        resp = await self.request("GET", path, token=None)
-        raise_for_status(resp)
-        return resp.json()
+        max_attempts = max(1, int(self._settings.http_max_retries) + 1)
+        async for attempt in AsyncRetrying(
+            retry=retry_if_exception_type((httpx.TimeoutException, httpx.NetworkError)),
+            stop=stop_after_attempt(max_attempts),
+            wait=wait_exponential(multiplier=0.5, min=0.5, max=4),
+            reraise=True,
+        ):
+            with attempt:
+                resp = await self.request("GET", path, token=None)
+                raise_for_status(resp)
+                return resp.json()
