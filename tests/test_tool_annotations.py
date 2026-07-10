@@ -234,6 +234,24 @@ def test_openai_schema_hardening_for_charge_log_create() -> None:
     assert "pattern" in params["properties"]["uuid"]["anyOf"][0]
 
 
+def test_openai_file_params_on_upload_tools() -> None:
+    """Canonical upload tools must expose OpenAI fileParams metadata."""
+    from ridelogger_mcp.app import mcp
+
+    expected = {
+        "user_avatar_upload": "avatar",
+        "vehicle_images_create": "image",
+        "vehicle_cabinet_create": "cabinet_file",
+        "vehicle_cabinet_update": "cabinet_file",
+        "vehicle_log_files_upload": "vehicle_log_file",
+    }
+    tools = asyncio.run(mcp.list_tools())
+    tool_map = {t.name: t for t in tools}
+    for tool_name, param in expected.items():
+        meta = tool_map[tool_name].meta or {}
+        assert meta.get("openai/fileParams") == [param], tool_name
+
+
 def test_openai_schema_hardening_for_reminder_filters_and_create() -> None:
     """Reminder status/alarm fields need explicit enum/date contract for OpenAI scan."""
     status_values = ["active", "passed", "canceled", "completed"]

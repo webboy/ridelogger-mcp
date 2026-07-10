@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import base64
-import io
 from typing import Any
 
 from fastmcp import FastMCP
 
+from ridelogger_mcp.file_inputs import (
+    ChatGptFileReference,
+    FileInputPolicy,
+    prepare_multipart_file,
+)
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.tool_semantics import get_annotations
@@ -83,41 +87,44 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_images_create",
         annotations=get_annotations("vehicle_images_create"),
         exclude_args=["access_token"],
+        meta={"openai/fileParams": ["image"]},
         description=(
             "[WRITE] Upload a gallery image (POST /api/vehicles/{vehicle_id}/images). "
             "Requires OAuth/Bearer authorization. "
-            "Exactly one of: (1) chat_upload_id — UUID from AI chat attachment (ai_chat_uploaded_files), "
-            "(2) file_base64 + file_name. "
-            "When using chat_upload_id, send form field chat_upload_id only (no binary)."
+            "Exactly one file source: (1) ChatGPT attachment via the `image` file-reference object "
+            "(OpenAI download_url + file_id), (2) RideLogger `chat_upload_id` UUID from ai_chat_uploaded_files "
+            "(not an OpenAI file_id), or (3) file_base64 + file_name. "
+            "Image files only, max 10 MB."
         ),
     )
     async def vehicle_images_create(
         vehicle_id: int,
+        image: ChatGptFileReference | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
         chat_upload_id: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
+        downloaded = None
         try:
             token = require_token(access_token)
             st = get_state()
-            if chat_upload_id and (file_base64 or file_name):
-                raise ValueError("Use either chat_upload_id or file upload fields, not both.")
-            if chat_upload_id:
+            files, upload_id, downloaded = await prepare_multipart_file(
+                field_name="image",
+                chatgpt_file=image,
+                chat_upload_id=chat_upload_id,
+                file_base64=file_base64,
+                file_name=file_name,
+                policy=FileInputPolicy.VEHICLE_IMAGE,
+            )
+            if upload_id:
                 resp = await st.client.request(
                     "POST",
                     f"/vehicles/{vehicle_id}/images",
                     token=token,
-                    data={"chat_upload_id": chat_upload_id.strip()},
+                    data={"chat_upload_id": upload_id},
                 )
             else:
-                if file_base64 and file_name:
-                    raw = base64.b64decode(file_base64)
-                else:
-                    raise ValueError("Provide chat_upload_id, or file_base64+file_name.")
-                files = {
-                    "image": (file_name, io.BytesIO(raw), "application/octet-stream"),
-                }
                 resp = await st.client.request(
                     "POST",
                     f"/vehicles/{vehicle_id}/images",
@@ -129,6 +136,9 @@ def register(mcp: FastMCP) -> None:
             return tool_success(data)
         except Exception as e:
             return tool_error(e)
+        finally:
+            if downloaded is not None:
+                downloaded.close()
 
     @mcp.tool(
         name="vehicle_images_delete",

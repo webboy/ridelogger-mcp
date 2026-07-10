@@ -32,7 +32,7 @@ No username/password login tools are exposed — authentication happens via the 
 
 | Tool | Purpose | Class |
 |---|---|---|
-| `user_avatar_upload` | Upload/replace the user's profile avatar (POST `/api/avatar`) via `chat_upload_id` or base64 | Write (destructive — replaces existing avatar) |
+| `user_avatar_upload` | Upload/replace profile avatar (POST `/api/user/avatar`) via ChatGPT `avatar`, `chat_upload_id`, or base64 | Write (destructive — replaces existing avatar) |
 
 ### Vehicles (4)
 
@@ -58,7 +58,7 @@ No username/password login tools are exposed — authentication happens via the 
 |---|---|---|
 | `vehicle_images_list` | List gallery images (GET `.../images`) | Read |
 | `vehicle_images_get` | Download one image as base64 + content type (GET `.../images/{image_id}`) | Read |
-| `vehicle_images_create` | Upload image via `chat_upload_id` or base64 (POST `.../images`) | Write |
+| `vehicle_images_create` | Upload image via ChatGPT `image`, `chat_upload_id`, or base64 (POST `.../images`) | Write |
 | `vehicle_images_delete` | Delete image (DELETE `.../images/{image_id}`) | Write (destructive, confirmation required) |
 
 ### Vehicle cabinet — private documents (6)
@@ -68,8 +68,8 @@ No username/password login tools are exposed — authentication happens via the 
 | `vehicle_cabinet_list` | List cabinet documents (GET `.../cabinet-documents`) | Read |
 | `vehicle_cabinet_get` | Get one document's metadata (GET `.../cabinet-documents/{document_id}`) | Read |
 | `vehicle_cabinet_download` | Download document bytes (GET `.../cabinet-documents/{document_id}/download`) | Read |
-| `vehicle_cabinet_create` | Upload a cabinet document (POST `.../cabinet-documents`) | Write |
-| `vehicle_cabinet_update` | Update document metadata/file (PUT `.../cabinet-documents/{document_id}`) | Write (destructive) |
+| `vehicle_cabinet_create` | Upload a cabinet document (POST `.../cabinet-documents`) via ChatGPT `cabinet_file`, `chat_upload_id`, or base64 | Write |
+| `vehicle_cabinet_update` | Update document metadata/file (PUT) via optional ChatGPT `cabinet_file` or base64; metadata-only OK | Write (destructive) |
 | `vehicle_cabinet_delete` | Delete document (DELETE) | Write (destructive, confirmation required) |
 
 ### Fuel logs (5) — multi-currency
@@ -125,8 +125,8 @@ No username/password login tools are exposed — authentication happens via the 
 |---|---|---|
 | `vehicle_log_files_list` | List attachments on a vehicle log (GET `.../get_files`) | Read |
 | `vehicle_log_files_download` | Download attachment bytes as base64 (GET `.../download_files/{uuid}`) | Read |
-| `vehicle_log_files_upload` | Multipart upload via `chat_upload_id` or base64 (POST `.../put_files`); 403 when attachment limit reached | Write |
-| `vehicle_log_files_upload_base64` | JSON-body upload variant (POST `.../put_files_cordova`) | Write |
+| `vehicle_log_files_upload` | Multipart upload via ChatGPT `vehicle_log_file`, `chat_upload_id`, or base64 (POST `.../put_files`); 402 when attachment limit reached | Write |
+| `vehicle_log_files_upload_base64` | JSON-body upload variant (POST `.../put_files_cordova`); no OpenAI file param | Write |
 | `vehicle_log_files_delete` | Delete one attachment by media uuid (DELETE `.../delete_files/{uuid}`) | Write (destructive, confirmation required) |
 
 ### Reminders (8)

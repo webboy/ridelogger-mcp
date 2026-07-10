@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import base64
-import io
 from typing import Any
 
 from fastmcp import FastMCP
 
+from ridelogger_mcp.file_inputs import (
+    ChatGptFileReference,
+    FileInputPolicy,
+    prepare_multipart_file,
+)
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.tool_semantics import get_annotations
@@ -110,10 +114,13 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_cabinet_create",
         annotations=get_annotations("vehicle_cabinet_create"),
         exclude_args=["access_token"],
+        meta={"openai/fileParams": ["cabinet_file"]},
         description=(
             "[WRITE] Upload a cabinet document (POST /api/vehicles/{vehicle_id}/cabinet-documents). "
             "Multipart: title, document_category, optional description/issued_at/expires_at, cabinet_file. "
-            "Provide exactly one file source: chat_upload_id or file_base64 + file_name."
+            "Exactly one file source: (1) ChatGPT attachment via `cabinet_file` file-reference object "
+            "(OpenAI download_url + file_id), (2) RideLogger `chat_upload_id` UUID from ai_chat_uploaded_files "
+            "(not an OpenAI file_id), or (3) file_base64 + file_name. Max 10 MB; allowed extensions match API allowlist."
         ),
     )
     async def vehicle_cabinet_create(
@@ -123,35 +130,30 @@ def register(mcp: FastMCP) -> None:
         description: str | None = None,
         issued_at: str | None = None,
         expires_at: str | None = None,
+        cabinet_file: ChatGptFileReference | None = None,
         chat_upload_id: str | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
+        downloaded = None
         try:
             token = require_token(access_token)
             st = get_state()
-            has_binary_source = bool(file_base64)
-            if chat_upload_id and has_binary_source:
-                raise ValueError("Use either chat_upload_id or file upload fields, not both.")
-
-            files = None
-            if chat_upload_id:
-                fname = None
-                raw = None
-            elif file_base64 and file_name:
-                raw = base64.b64decode(file_base64)
-                fname = file_name
-            else:
-                raise ValueError("Provide chat_upload_id, or file_base64+file_name.")
-            if raw is not None and fname is not None:
-                files = {"cabinet_file": (fname, io.BytesIO(raw), "application/octet-stream")}
+            files, upload_id, downloaded = await prepare_multipart_file(
+                field_name="cabinet_file",
+                chatgpt_file=cabinet_file,
+                chat_upload_id=chat_upload_id,
+                file_base64=file_base64,
+                file_name=file_name,
+                policy=FileInputPolicy.CABINET,
+            )
             data: dict[str, Any] = {
                 "title": title,
                 "document_category": document_category,
             }
-            if chat_upload_id:
-                data["chat_upload_id"] = chat_upload_id.strip()
+            if upload_id:
+                data["chat_upload_id"] = upload_id
             if description:
                 data["description"] = description
             if issued_at:
@@ -170,15 +172,21 @@ def register(mcp: FastMCP) -> None:
             return tool_success(out)
         except Exception as e:
             return tool_error(e)
+        finally:
+            if downloaded is not None:
+                downloaded.close()
 
     @mcp.tool(
         name="vehicle_cabinet_update",
         annotations=get_annotations("vehicle_cabinet_update"),
         exclude_args=["access_token"],
+        meta={"openai/fileParams": ["cabinet_file"]},
         description=(
             "[WRITE] Update cabinet document metadata and/or replace file "
             "(PUT /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}). "
-            "Optional file_base64 + file_name for cabinet_file."
+            "Optional file replacement via ChatGPT `cabinet_file` attachment, or file_base64 + file_name. "
+            "Metadata-only update when no file source is provided. "
+            "RideLogger chat_upload_id is not supported on update."
         ),
     )
     async def vehicle_cabinet_update(
@@ -189,22 +197,27 @@ def register(mcp: FastMCP) -> None:
         description: str | None = None,
         issued_at: str | None = None,
         expires_at: str | None = None,
+        cabinet_file: ChatGptFileReference | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
+        downloaded = None
         try:
             token = require_token(access_token)
             st = get_state()
-            raw = None
-            fname = None
-            if file_base64 and file_name:
-                raw = base64.b64decode(file_base64)
-                fname = file_name
+            files, _upload_id, downloaded = await prepare_multipart_file(
+                field_name="cabinet_file",
+                chatgpt_file=cabinet_file,
+                chat_upload_id=None,
+                file_base64=file_base64,
+                file_name=file_name,
+                policy=FileInputPolicy.CABINET,
+                allow_no_file=True,
+            )
 
-            if raw is not None and fname is not None:
-                files = {"cabinet_file": (fname, io.BytesIO(raw), "application/octet-stream")}
-                data = {}
+            if files is not None:
+                data: dict[str, Any] = {}
                 if title is not None:
                     data["title"] = title
                 if document_category is not None:
@@ -245,6 +258,9 @@ def register(mcp: FastMCP) -> None:
             return tool_success(out)
         except Exception as e:
             return tool_error(e)
+        finally:
+            if downloaded is not None:
+                downloaded.close()
 
     @mcp.tool(
         name="vehicle_cabinet_delete",

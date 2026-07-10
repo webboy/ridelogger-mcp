@@ -2,16 +2,25 @@
 
 from __future__ import annotations
 
-import base64
-import io
 from typing import Any
 
 from fastmcp import FastMCP
 
+from ridelogger_mcp.file_inputs import (
+    ChatGptFileReference,
+    FileInputPolicy,
+    prepare_multipart_file,
+)
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import require_token, tool_error, tool_success
+
+_FILE_SOURCE_HELP = (
+    "Exactly one file source: (1) ChatGPT attachment via the `avatar` file-reference object "
+    "(OpenAI download_url + file_id), (2) RideLogger `chat_upload_id` UUID from ai_chat_uploaded_files "
+    "(AI/PWA pipeline — not an OpenAI file_id), or (3) file_base64 + file_name for other MCP clients."
+)
 
 
 def register(mcp: FastMCP) -> None:
@@ -19,53 +28,57 @@ def register(mcp: FastMCP) -> None:
         name="user_avatar_upload",
         annotations=get_annotations("user_avatar_upload"),
         exclude_args=["access_token"],
+        meta={"openai/fileParams": ["avatar"]},
         description=(
             "[WRITE] Upload or replace the authenticated user's profile avatar "
-            "(POST /api/avatar). "
+            "(POST /api/user/avatar). "
             "Requires OAuth/Bearer authorization. "
-            "Exactly one of: (1) chat_upload_id — UUID from AI chat attachment "
-            "(ai_chat_uploaded_files), (2) file_base64 + file_name. "
-            "When using chat_upload_id, the image is taken from the chat upload — "
-            "no binary data needed. "
+            + _FILE_SOURCE_HELP
+            + " Image files only, max 10 MB. "
             "Returns the updated user profile on success."
         ),
     )
     async def user_avatar_upload(
+        avatar: ChatGptFileReference | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
         chat_upload_id: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
+        downloaded = None
         try:
             token = require_token(access_token)
             st = get_state()
 
-            if chat_upload_id and (file_base64 or file_name):
-                raise ValueError("Use either chat_upload_id or file_base64+file_name, not both.")
+            files, upload_id, downloaded = await prepare_multipart_file(
+                field_name="avatar",
+                chatgpt_file=avatar,
+                chat_upload_id=chat_upload_id,
+                file_base64=file_base64,
+                file_name=file_name,
+                policy=FileInputPolicy.AVATAR_IMAGE,
+            )
 
-            if chat_upload_id:
+            if upload_id:
                 resp = await st.client.request(
                     "POST",
                     "/user/avatar",
                     token=token,
-                    data={"chat_upload_id": chat_upload_id.strip()},
+                    data={"chat_upload_id": upload_id},
                 )
-            elif file_base64 and file_name:
-                raw = base64.b64decode(file_base64)
-                files = {
-                    "avatar": (file_name, io.BytesIO(raw), "application/octet-stream"),
-                }
+            else:
                 resp = await st.client.request(
                     "POST",
                     "/user/avatar",
                     token=token,
                     files=files,
                 )
-            else:
-                raise ValueError("Provide chat_upload_id, or file_base64 + file_name.")
 
             raise_for_status(resp)
             data = resp.json() if resp.content else None
             return tool_success(data)
         except Exception as e:
             return tool_error(e)
+        finally:
+            if downloaded is not None:
+                downloaded.close()

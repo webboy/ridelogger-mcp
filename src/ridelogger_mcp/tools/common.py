@@ -144,6 +144,18 @@ def tool_success(data: Any = None) -> dict[str, Any]:
     return {"ok": True, "data": sanitize_tool_data(data)}
 
 
+def _redact_sensitive_error_message(message: str) -> str:
+    lowered = message.lower()
+    if any(
+        marker in lowered
+        for marker in ("download_url", "token=", "sig=", "file_id=file_")
+    ):
+        return "Invalid file source or file download failed."
+    if "https://" in lowered or "http://" in lowered:
+        return "Invalid file source or file download failed."
+    return message
+
+
 def tool_error(e: Exception) -> dict[str, Any]:
     if isinstance(e, UpstreamApiError):
         err_obj: dict[str, Any] = {
@@ -158,7 +170,13 @@ def tool_error(e: Exception) -> dict[str, Any]:
                 err_obj["errors"] = field_errors
         return {"ok": False, "error": err_obj}
     if isinstance(e, ValueError):
-        return {"ok": False, "error": {"type": "validation", "message": str(e)}}
+        return {
+            "ok": False,
+            "error": {
+                "type": "validation",
+                "message": _redact_sensitive_error_message(str(e)),
+            },
+        }
     return {
         "ok": False,
         "error": {"type": "internal", "message": str(e)},

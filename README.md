@@ -115,6 +115,28 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 **Auth:** MCP discovery requests (`initialize`, `tools/list`, `resources/list`) are public so ChatGPT/OpenAI Platform and other clients can scan the server. User-data tool calls require OAuth/Bearer and should send `Authorization: Bearer <token>` on MCP HTTP requests. The tool-call middleware validates the token via `/api/auth/me`. No username/password auth tools are exposed.
 
+### ChatGPT-native file attachments
+
+Five upload tools declare OpenAI Apps SDK file parameters via `_meta["openai/fileParams"]`:
+
+| Tool | File argument | Upstream multipart field |
+|------|---------------|--------------------------|
+| `user_avatar_upload` | `avatar` | `avatar` |
+| `vehicle_images_create` | `image` | `image` |
+| `vehicle_cabinet_create` | `cabinet_file` | `cabinet_file` |
+| `vehicle_cabinet_update` | `cabinet_file` (optional replacement) | `cabinet_file` |
+| `vehicle_log_files_upload` | `vehicle_log_file` | `vehicle_log_file` |
+
+When the user attaches a file in ChatGPT, the host injects a top-level object `{download_url, file_id, mime_type?, file_name?}`. MCP downloads the temporary HTTPS URL inside the tool call (bounded streaming, SSRF checks, MIME validation) and forwards bytes to the existing RideLogger API multipart endpoints.
+
+**Three distinct file sources** (mutually exclusive on create/upload tools):
+
+1. **ChatGPT attachment** — OpenAI `file_id` + `download_url` on the file-reference argument above.
+2. **RideLogger `chat_upload_id`** — internal UUID from `ai_chat_uploaded_files` (AI/PWA pipeline); **not** an OpenAI file id.
+3. **Base64 fallback** — `file_base64` + `file_name` for other MCP clients (`vehicle_log_files_upload_base64` remains JSON-only and has no OpenAI file param).
+
+Implementation: `src/ridelogger_mcp/file_inputs.py`.
+
 | Tool | Token | Description |
 |------|-------|-------------|
 | `auth_me` | yes | GET `/api/auth/me` — account settings only (settings allowlist incl. `currency_id` display currency; no profile identity fields). No username/password login tool is exposed. |
@@ -124,7 +146,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 | Tool | Token | Description |
 |------|-------|-------------|
-| `user_avatar_upload` | yes | POST `/api/avatar` — upload/replace profile avatar (`chat_upload_id` or base64). |
+| `user_avatar_upload` | yes | POST `/api/user/avatar` — upload/replace profile avatar (ChatGPT `avatar`, `chat_upload_id`, or base64). |
 
 **Vehicles**
 
@@ -150,7 +172,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 |------|-------|-------------|
 | `vehicle_images_list` | yes | List images for a vehicle. |
 | `vehicle_images_get` | yes | Get image bytes/metadata. |
-| `vehicle_images_create` | yes | Upload image — multipart / chat_upload_id per API. |
+| `vehicle_images_create` | yes | Upload image — ChatGPT `image`, `chat_upload_id`, or base64. |
 | `vehicle_images_delete` | yes | Delete image. |
 
 **Vehicle cabinet (private documents)**
@@ -160,8 +182,8 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `vehicle_cabinet_list` | yes | GET `.../vehicles/{id}/cabinet-documents`. |
 | `vehicle_cabinet_get` | yes | Get one document's metadata. |
 | `vehicle_cabinet_download` | yes | Download document bytes. |
-| `vehicle_cabinet_create` | yes | Upload a cabinet document. |
-| `vehicle_cabinet_update` | yes | Update document metadata/file. |
+| `vehicle_cabinet_create` | yes | Upload a cabinet document (ChatGPT `cabinet_file`, `chat_upload_id`, or base64). |
+| `vehicle_cabinet_update` | yes | Update metadata and/or replace file (ChatGPT `cabinet_file` or base64; metadata-only OK). |
 | `vehicle_cabinet_delete` | yes | Delete document. |
 
 **Fuel logs** (multi-currency — see tool description for `currency_id` / aggregation)
@@ -211,8 +233,8 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 | `generic_vehicle_logs_list` | yes | GET `.../vehicles/{id}/vehicle_logs` (aggregated fuel/service/expense). |
 | `generic_vehicle_logs_delete` | yes | DELETE a generic vehicle log row. |
 | `vehicle_log_files_list` | yes | List files on a vehicle log. |
-| `vehicle_log_files_upload` | yes | Multipart upload via `chat_upload_id` or `file_base64` + file name. The API may return 403 if the log has reached its attachment limit. |
-| `vehicle_log_files_upload_base64` | yes | Upload via JSON using `chat_upload_id` or base64 file + name. The API may return 403 if the log has reached its attachment limit. |
+| `vehicle_log_files_upload` | yes | Multipart upload via ChatGPT `vehicle_log_file`, `chat_upload_id`, or base64. The API may return 402 when the log attachment limit is reached. |
+| `vehicle_log_files_upload_base64` | yes | JSON upload via `chat_upload_id` or base64 (no ChatGPT file param). The API may return 402 when the attachment limit is reached. |
 | `vehicle_log_files_delete` | yes | Delete attachment. |
 | `vehicle_log_files_download` | yes | Download attachment bytes. |
 

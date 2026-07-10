@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import base64
-import io
 from typing import Any
 
 from fastmcp import FastMCP
 
+from ridelogger_mcp.file_inputs import (
+    ChatGptFileReference,
+    FileInputPolicy,
+    prepare_multipart_file,
+)
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
@@ -118,42 +122,45 @@ def register(mcp: FastMCP) -> None:
         name="vehicle_log_files_upload",
         annotations=get_annotations("vehicle_log_files_upload"),
         exclude_args=["access_token"],
+        meta={"openai/fileParams": ["vehicle_log_file"]},
         description=(
             "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
-            "Requires OAuth/Bearer authorization. Exactly one of: chat_upload_id (AI chat attachment UUID), "
-            "or file_base64 + file_name. "
-            "Some accounts allow a limited number of attachments per vehicle log; if the limit is reached, "
-            "the API returns 403. Remove an existing attachment before retrying."
+            "Requires OAuth/Bearer authorization. Exactly one file source: (1) ChatGPT attachment via "
+            "`vehicle_log_file` file-reference object (OpenAI download_url + file_id), (2) RideLogger chat_upload_id "
+            "UUID from ai_chat_uploaded_files (not an OpenAI file_id), or (3) file_base64 + file_name. "
+            "Max 10 MB. Some accounts allow a limited number of attachments per vehicle log; if the limit is reached, "
+            "the API returns 402. Remove an existing attachment before retrying."
         ),
     )
     async def vehicle_log_files_upload(
         vehicle_id: int,
         vehicle_log_id: int,
+        vehicle_log_file: ChatGptFileReference | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
         chat_upload_id: str | None = None,
         access_token: str | None = None,
     ) -> dict[str, Any]:
+        downloaded = None
         try:
             token = require_token(access_token)
             st = get_state()
-            if chat_upload_id and (file_base64 or file_name):
-                raise ValueError("Use either chat_upload_id or file fields, not both.")
-            if chat_upload_id:
+            files, upload_id, downloaded = await prepare_multipart_file(
+                field_name="vehicle_log_file",
+                chatgpt_file=vehicle_log_file,
+                chat_upload_id=chat_upload_id,
+                file_base64=file_base64,
+                file_name=file_name,
+                policy=FileInputPolicy.LOG_ATTACHMENT,
+            )
+            if upload_id:
                 resp = await st.client.request(
                     "POST",
                     f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files",
                     token=token,
-                    data={"chat_upload_id": chat_upload_id.strip()},
+                    data={"chat_upload_id": upload_id},
                 )
             else:
-                if file_base64 and file_name:
-                    raw = base64.b64decode(file_base64)
-                else:
-                    raise ValueError("Provide chat_upload_id, or file_base64+file_name.")
-                files = {
-                    "vehicle_log_file": (file_name, io.BytesIO(raw), "application/octet-stream"),
-                }
                 resp = await st.client.request(
                     "POST",
                     f"/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}/put_files",
@@ -165,6 +172,9 @@ def register(mcp: FastMCP) -> None:
             return tool_success(data)
         except Exception as e:
             return tool_error(e)
+        finally:
+            if downloaded is not None:
+                downloaded.close()
 
     @mcp.tool(
         name="vehicle_log_files_upload_base64",

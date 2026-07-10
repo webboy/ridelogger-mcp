@@ -113,6 +113,31 @@ Canonical string (newline-joined): `METHOD \n request-target(path?query) \n time
 
 `raise_for_status()` converts non-2xx responses into `UpstreamApiError(status_code, message, body)`. The message combines the upstream `message`/`errors` payload with an actionable hint per status (401 reauthorize, 403 permission, 404 check ids, 422 validation, 429 rate limit, 5xx retry). For 402 the upstream body is never forwarded — the message is replaced with a neutral account-limit sentence (upstream 402 bodies contain account-tier/upsell wording that must not reach MCP clients). `tools/common.tool_error()` turns these into structured `{"ok": false, "error": {...}}` results, including Laravel field errors when present.
 
+### ChatGPT file-input boundary (`file_inputs.py`)
+
+For OpenAI Apps SDK attachments, five upload tools expose top-level file-reference arguments with `_meta["openai/fileParams"]`. The host injects `{download_url, file_id, mime_type?, file_name?}` at call time.
+
+```
+ChatGPT attachment
+  → MCP tool receives file-reference object
+  → file_inputs.download_chatgpt_file()  (separate httpx client, no RideLogger auth)
+  → bounded spooled temp file + MIME policy
+  → ApiClient.request(..., files=...)    (existing multipart + HMAC UNSIGNED-PAYLOAD)
+  → ridelogger-api storage
+```
+
+Trust boundary: any `download_url` is treated as untrusted input even when injected by ChatGPT.
+
+| Control | Behavior |
+|---|---|
+| Scheme | HTTPS only |
+| SSRF | Reject loopback/private/link-local/reserved IPs; validate DNS on each redirect hop |
+| Size | Max 10 MiB per endpoint policy (matches API upload limits) |
+| MIME | Prefer concrete `Content-Type`; if generic `application/octet-stream`, use declared MIME + extension; magic-byte sniff when available; reject clear conflicts |
+| Secrets | Never log or return `download_url`, query tokens, or file bytes in tool errors |
+
+Legacy sources unchanged: RideLogger `chat_upload_id` (internal UUID) and base64 multipart for non-ChatGPT MCP clients. `vehicle_log_files_upload_base64` intentionally has no OpenAI file metadata.
+
 ## Reference cache and resources
 
 ### `reference_cache.py` + `reference_paths.py`
@@ -179,6 +204,7 @@ All settings via pydantic-settings (`.env` file or environment; extra vars ignor
 
 | Suite | What it locks down |
 |---|---|
+| `test_chatgpt_file_inputs.py` | OpenAI fileParams metadata/schema, SSRF/MIME/size download policy, multipart forwarding smoke. |
 | `test_tool_annotations.py` | **Registry invariant**: `validate_registry()` passes; every registered tool has annotations; all non-mutating tools have `readOnlyHint=True`; all `risk="high"` tools have `destructiveHint=True`; `openWorldHint=False` everywhere; unknown names raise `KeyError`. Adding a tool without semantics fails CI. |
 | `test_tool_dispatch_upstream.py` | Exercises every registered tool against a stubbed HTTP client — verifies method/path/params per tool. |
 | `test_api_consumer_signing.py` | Canonical string + HMAC header construction, unsigned-payload handling for multipart. |
