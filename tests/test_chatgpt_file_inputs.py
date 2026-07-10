@@ -331,6 +331,11 @@ def test_tool_error_does_not_leak_download_url() -> None:
 def test_vehicle_cabinet_create_native_forwards_multipart(monkeypatch: pytest.MonkeyPatch) -> None:
     import ridelogger_mcp.state as state_mod
 
+    monkeypatch.setattr(
+        "ridelogger_mcp.bearer_auth.get_http_bearer_token",
+        lambda: "__stub-token__",
+    )
+
     downloaded = DownloadedFile(
         file_name="invoice.pdf",
         content_type="application/pdf",
@@ -373,7 +378,6 @@ def test_vehicle_cabinet_create_native_forwards_multipart(monkeypatch: pytest.Mo
                     "mime_type": "application/pdf",
                     "file_name": "invoice.pdf",
                 },
-                "access_token": "__stub-token__",
             },
         )
     )

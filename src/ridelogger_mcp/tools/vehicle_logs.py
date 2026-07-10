@@ -18,9 +18,9 @@ from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
+    ToolToken,
     body_from_kwargs,
     compact_query_params,
-    require_token,
     tool_error,
     tool_success,
 )
@@ -30,7 +30,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_list",
         annotations=get_annotations("generic_vehicle_logs_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List all vehicle log entries for a vehicle (fuel, service, expense) — "
             "GET /api/vehicles/{vehicle_id}/vehicle_logs. Requires OAuth/Bearer authorization. "
@@ -44,10 +43,9 @@ def register(mcp: FastMCP) -> None:
         date_from: str | None = None,
         date_to: str | None = None,
         currency_id: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params = compact_query_params(
                 {
@@ -69,7 +67,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="generic_vehicle_logs_delete",
         annotations=get_annotations("generic_vehicle_logs_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete a generic vehicle log row (DELETE /api/vehicles/{vehicle_id}/vehicle_logs/{vehicle_log_id}). "
             "Requires OAuth/Bearer authorization. Returns 202 on success."
@@ -78,10 +75,9 @@ def register(mcp: FastMCP) -> None:
     async def generic_vehicle_logs_delete(
         vehicle_id: int,
         vehicle_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",
@@ -95,7 +91,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_list",
         annotations=get_annotations("vehicle_log_files_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List file attachments on a vehicle log (GET .../vehicle_logs/{vehicle_log_id}/get_files). "
             "Requires OAuth/Bearer authorization."
@@ -104,10 +99,9 @@ def register(mcp: FastMCP) -> None:
     async def vehicle_log_files_list(
         vehicle_id: int,
         vehicle_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -121,7 +115,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload",
         annotations=get_annotations("vehicle_log_files_upload"),
-        exclude_args=["access_token"],
         meta={"openai/fileParams": ["vehicle_log_file"]},
         description=(
             "[WRITE] Upload attachment via multipart (POST .../put_files). Field name vehicle_log_file for binary. "
@@ -139,11 +132,10 @@ def register(mcp: FastMCP) -> None:
         file_name: str | None = None,
         file_base64: str | None = None,
         chat_upload_id: str | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         downloaded = None
         try:
-            token = require_token(access_token)
             st = get_state()
             files, upload_id, downloaded = await prepare_multipart_file(
                 field_name="vehicle_log_file",
@@ -179,7 +171,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_upload_base64",
         annotations=get_annotations("vehicle_log_files_upload_base64"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Upload attachment via JSON body (POST .../put_files_cordova). "
             "Requires OAuth/Bearer authorization. "
@@ -195,10 +186,9 @@ def register(mcp: FastMCP) -> None:
         chat_upload_id: str | None = None,
         vehicle_log_file: str | None = None,
         vehicle_log_file_name: str | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             if chat_upload_id and (vehicle_log_file or vehicle_log_file_name):
                 raise ValueError("Use either chat_upload_id or base64 file fields, not both.")
             if chat_upload_id:
@@ -224,7 +214,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_delete",
         annotations=get_annotations("vehicle_log_files_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete one attachment by media uuid (DELETE .../delete_files/{uuid}). Requires OAuth/Bearer authorization."
         ),
@@ -233,10 +222,9 @@ def register(mcp: FastMCP) -> None:
         vehicle_id: int,
         vehicle_log_id: int,
         uuid: str,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",
@@ -250,7 +238,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_log_files_download",
         annotations=get_annotations("vehicle_log_files_download"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Download attachment bytes as base64 (GET .../download_files/{uuid}). Requires OAuth/Bearer authorization."
         ),
@@ -259,10 +246,9 @@ def register(mcp: FastMCP) -> None:
         vehicle_id: int,
         vehicle_log_id: int,
         uuid: str,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             raw, headers = await st.client.request_bytes(
                 "GET",

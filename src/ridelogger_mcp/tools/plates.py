@@ -10,7 +10,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import body_from_kwargs, require_token, tool_error, tool_success
+from ridelogger_mcp.tools.common import body_from_kwargs, tool_error, tool_success, ToolToken
 
 PlateDate = Annotated[
     str,
@@ -36,7 +36,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_list",
         annotations=get_annotations("vehicle_plates_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List plates for a vehicle (GET /api/vehicles/{vehicle_id}/vehicle_plates). "
             "Requires OAuth/Bearer authorization."
@@ -44,10 +43,9 @@ def register(mcp: FastMCP) -> None:
     )
     async def vehicle_plates_list(
         vehicle_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -61,7 +59,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_create",
         annotations=get_annotations("vehicle_plates_create"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Create plate (POST .../vehicle_plates). Requires OAuth/Bearer authorization. "
             "Fields match VehiclePlateStoreRequest: plate, country_id, valid_from, valid_to, uuid. "
@@ -75,10 +72,9 @@ def register(mcp: FastMCP) -> None:
         valid_from: PlateDate,
         valid_to: PlateDate,
         uuid: PlateUuid,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 plate=plate,
                 country_id=country_id,
@@ -100,7 +96,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_update",
         annotations=get_annotations("vehicle_plates_update"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Update plate (PUT .../vehicle_plates/{plate_id}). Requires OAuth/Bearer authorization. "
             "Fields match VehiclePlateUpdateRequest: plate, country_id, valid_from, valid_to. "
@@ -114,10 +109,9 @@ def register(mcp: FastMCP) -> None:
         country_id: int,
         valid_from: PlateDate,
         valid_to: PlateDate,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 plate=plate,
                 country_id=country_id,
@@ -138,7 +132,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_plates_delete",
         annotations=get_annotations("vehicle_plates_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete plate (DELETE .../vehicle_plates/{plate_id}). Requires OAuth/Bearer authorization."
         ),
@@ -146,10 +139,9 @@ def register(mcp: FastMCP) -> None:
     async def vehicle_plates_delete(
         vehicle_id: int,
         plate_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",

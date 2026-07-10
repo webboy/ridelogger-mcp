@@ -8,7 +8,7 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import require_token, tool_error, tool_success
+from ridelogger_mcp.tools.common import tool_error, tool_success, ToolToken
 
 # ChatGPT only needs account *settings* to work with vehicle data (currency,
 # units, country/language, active vehicle). Profile identity fields (names,
@@ -41,7 +41,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="auth_me",
         annotations=get_annotations("auth_me"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Current account settings (GET /api/auth/me). "
             "Requires OAuth/Bearer authorization. "
@@ -54,9 +53,8 @@ def register(mcp: FastMCP) -> None:
             "Errors: 401 if token missing/expired."
         ),
     )
-    async def auth_me(access_token: str | None = None) -> dict[str, Any]:
+    async def auth_me(token: str = ToolToken) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json("GET", "/auth/me", token=token)
             return tool_success(_settings_only(data))

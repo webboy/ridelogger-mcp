@@ -11,9 +11,9 @@ from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
+    ToolToken,
     body_from_kwargs,
     compact_query_params,
-    require_token,
     tool_error,
     tool_success,
 )
@@ -23,7 +23,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_list",
         annotations=get_annotations("expense_logs_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List expense logs for a vehicle (GET /api/vehicles/{vehicle_id}/expense_logs). "
             "Requires OAuth/Bearer authorization. Optional page. "
@@ -38,10 +37,9 @@ def register(mcp: FastMCP) -> None:
         date_to: str | None = None,
         currency_id: int | None = None,
         expense_type_id: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params = compact_query_params(
                 {
@@ -65,7 +63,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_create",
         annotations=get_annotations("expense_logs_create"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Create expense log (POST .../expense_logs). Requires OAuth/Bearer authorization. "
             "ExpenseLogStoreRequest: amount, currency_id, mileage, expense_type_id, title; "
@@ -89,10 +86,9 @@ def register(mcp: FastMCP) -> None:
         latitude: float | None = None,
         longitude: float | None = None,
         rating: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 amount=amount,
                 currency_id=currency_id,
@@ -122,7 +118,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_get",
         annotations=get_annotations("expense_logs_get"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Get one expense log (GET .../expense_logs/{expense_log_id}). Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -131,10 +126,9 @@ def register(mcp: FastMCP) -> None:
     async def expense_logs_get(
         vehicle_id: int,
         expense_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -148,7 +142,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_update",
         annotations=get_annotations("expense_logs_update"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Update expense log (PUT .../expense_logs/{expense_log_id}). Requires OAuth/Bearer authorization. "
             "Optional: amount, currency_id, mileage, expense_type_id (ExpenseLogUpdateRequest); "
@@ -172,10 +165,9 @@ def register(mcp: FastMCP) -> None:
         latitude: float | None = None,
         longitude: float | None = None,
         rating: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 amount=amount,
                 currency_id=currency_id,
@@ -206,7 +198,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="expense_logs_delete",
         annotations=get_annotations("expense_logs_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete expense log (DELETE .../expense_logs/{expense_log_id}). Requires OAuth/Bearer authorization."
         ),
@@ -214,10 +205,9 @@ def register(mcp: FastMCP) -> None:
     async def expense_logs_delete(
         vehicle_id: int,
         expense_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",

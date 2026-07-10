@@ -3,9 +3,19 @@
 from __future__ import annotations
 
 import json
+from types import TracebackType
 from typing import Any
 
-from ridelogger_mcp.bearer_auth import get_http_bearer_token
+from fastmcp.dependencies import Depends
+from fastmcp.exceptions import ToolError
+from uncalled_for import Dependency
+
+from ridelogger_mcp.errors import UpstreamApiError
+from ridelogger_mcp.logging_setup import new_request_id
+
+_AUTH_REQUIRED_MSG = (
+    "Authorization is required. Configure the MCP client OAuth/Bearer connection and retry."
+)
 
 # Appended to tool descriptions for endpoints that return monetary log rows (fuel, service, expense, …).
 MONEY_LOGS_HINT = (
@@ -31,8 +41,6 @@ LOG_REFS_HINT = (
     "expense_type {id,name} (expense logs), unit_label (fuel unit name string), energy_unit_label (charge logs), "
     "currency_info {id,code,name,symbol}. Null when the field does not apply to the log type."
 )
-from ridelogger_mcp.errors import UpstreamApiError
-from ridelogger_mcp.logging_setup import new_request_id
 
 _MINIMIZED_KEY_NAMES = {
     "access_token",
@@ -77,14 +85,38 @@ _MINIMIZED_KEY_SUFFIXES = (
 
 def require_token(access_token: str | None) -> str:
     new_request_id()
-    bearer = get_http_bearer_token()
+    from ridelogger_mcp import bearer_auth
+
+    bearer = bearer_auth.get_http_bearer_token()
     if bearer:
         return bearer
     if not access_token or not str(access_token).strip():
-        raise ValueError(
-            "Authorization is required. Configure the MCP client OAuth/Bearer connection and retry."
-        )
+        raise ValueError(_AUTH_REQUIRED_MSG)
     return str(access_token).strip()
+
+
+class _RideLoggerToolToken(Dependency[str]):
+    """Inject HTTP Bearer token validated by RideLoggerBearerMiddleware."""
+
+    async def __aenter__(self) -> str:
+        new_request_id()
+        from ridelogger_mcp import bearer_auth
+
+        bearer = bearer_auth.get_http_bearer_token()
+        if bearer:
+            return bearer
+        raise ToolError(_AUTH_REQUIRED_MSG)
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        return None
+
+
+ToolToken = Depends(_RideLoggerToolToken)
 
 
 def parse_json_object(label: str, raw: str | None) -> dict[str, Any]:

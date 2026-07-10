@@ -8,14 +8,13 @@ from fastmcp import FastMCP
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import VEHICLE_REFS_HINT, body_from_kwargs, require_token, tool_error, tool_success
+from ridelogger_mcp.tools.common import VEHICLE_REFS_HINT, body_from_kwargs, tool_error, tool_success, ToolToken
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_list",
         annotations=get_annotations("vehicles_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List vehicles the user can manage (GET /api/vehicles). "
             "Requires OAuth/Bearer authorization. "
@@ -30,10 +29,9 @@ def register(mcp: FastMCP) -> None:
         vehicle_make_id: int | None = None,
         vehicle_model_id: int | None = None,
         production_year: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params: dict[str, Any] = {}
             if page is not None:
@@ -57,7 +55,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_create",
         annotations=get_annotations("vehicles_create"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Create a vehicle (POST /api/vehicles). Requires OAuth/Bearer authorization. "
             "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
@@ -84,10 +81,9 @@ def register(mcp: FastMCP) -> None:
         engine_displacement: int | None = None,
         engine_power_kw: int | None = None,
         engine_power_hp: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 vehicle_type_id=vehicle_type_id,
                 vehicle_make_id=vehicle_make_id,
@@ -118,15 +114,13 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_get",
         annotations=get_annotations("vehicles_get"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Get one vehicle by id (GET /api/vehicles/{vehicle_id}). Requires OAuth/Bearer authorization. "
             + VEHICLE_REFS_HINT
         ),
     )
-    async def vehicles_get(vehicle_id: int, access_token: str | None = None) -> dict[str, Any]:
+    async def vehicles_get(vehicle_id: int, token: str = ToolToken) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -140,7 +134,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicles_update",
         annotations=get_annotations("vehicles_update"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires OAuth/Bearer authorization. "
             "Only **vehicle_id** is required; include **only fields that change** (API merges with existing row). "
@@ -170,10 +163,9 @@ def register(mcp: FastMCP) -> None:
         engine_displacement: int | None = None,
         engine_power_kw: int | None = None,
         engine_power_hp: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 vehicle_type_id=vehicle_type_id,
                 vehicle_make_id=vehicle_make_id,

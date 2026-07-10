@@ -76,7 +76,7 @@ MCP protocol requests that do not call tools (`initialize`, `tools/list`, `resou
 2. If a bearer is present, validates it by calling upstream **`GET /api/auth/me`** with that token. A rejection returns a structured `ToolResult` error (`{"ok": false, "error": {"type": "bearer_auth", ...}}`) instead of raising.
 3. On success, stores the token in a `ContextVar` (`_http_bearer_token`) for the duration of the call; tools retrieve it via `get_http_bearer_token()` inside `require_token()` (`tools/common.py`).
 
-`require_token()` prefers the validated HTTP bearer; a hidden legacy `access_token` tool argument is still accepted for old non-HTTP clients but is excluded from MCP input schemas. The only tool that skips the token entirely is `reference_data_refresh` (server-side cache reload).
+`ToolToken` (FastMCP `Depends` on `_RideLoggerToolToken`) supplies the validated HTTP bearer from `RideLoggerBearerMiddleware`. The only tool that skips the token entirely is `reference_data_refresh` (server-side cache reload).
 
 ### 3. OAuth resource-server metadata (`auth_provider.py`)
 

@@ -15,14 +15,13 @@ from ridelogger_mcp.file_inputs import (
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.errors import raise_for_status
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import require_token, tool_error, tool_success
+from ridelogger_mcp.tools.common import tool_error, tool_success, ToolToken
 
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_list",
         annotations=get_annotations("vehicle_cabinet_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List cabinet documents for a vehicle "
             "(GET /api/vehicles/{vehicle_id}/cabinet-documents). Requires OAuth/Bearer authorization."
@@ -30,10 +29,9 @@ def register(mcp: FastMCP) -> None:
     )
     async def vehicle_cabinet_list(
         vehicle_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -47,7 +45,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_get",
         annotations=get_annotations("vehicle_cabinet_get"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Show one cabinet document metadata "
             "(GET /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}). Requires OAuth/Bearer authorization."
@@ -56,10 +53,9 @@ def register(mcp: FastMCP) -> None:
     async def vehicle_cabinet_get(
         vehicle_id: int,
         document_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -73,7 +69,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_download",
         annotations=get_annotations("vehicle_cabinet_download"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Download cabinet file bytes "
             "(GET /api/vehicles/{vehicle_id}/cabinet-documents/{document_id}/download). "
@@ -83,10 +78,9 @@ def register(mcp: FastMCP) -> None:
     async def vehicle_cabinet_download(
         vehicle_id: int,
         document_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             raw, headers = await st.client.request_bytes(
                 "GET",
@@ -113,7 +107,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_create",
         annotations=get_annotations("vehicle_cabinet_create"),
-        exclude_args=["access_token"],
         meta={"openai/fileParams": ["cabinet_file"]},
         description=(
             "[WRITE] Upload a cabinet document (POST /api/vehicles/{vehicle_id}/cabinet-documents). "
@@ -134,11 +127,10 @@ def register(mcp: FastMCP) -> None:
         chat_upload_id: str | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         downloaded = None
         try:
-            token = require_token(access_token)
             st = get_state()
             files, upload_id, downloaded = await prepare_multipart_file(
                 field_name="cabinet_file",
@@ -179,7 +171,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_update",
         annotations=get_annotations("vehicle_cabinet_update"),
-        exclude_args=["access_token"],
         meta={"openai/fileParams": ["cabinet_file"]},
         description=(
             "[WRITE] Update cabinet document metadata and/or replace file "
@@ -200,11 +191,10 @@ def register(mcp: FastMCP) -> None:
         cabinet_file: ChatGptFileReference | None = None,
         file_name: str | None = None,
         file_base64: str | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         downloaded = None
         try:
-            token = require_token(access_token)
             st = get_state()
             files, _upload_id, downloaded = await prepare_multipart_file(
                 field_name="cabinet_file",
@@ -265,7 +255,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="vehicle_cabinet_delete",
         annotations=get_annotations("vehicle_cabinet_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete cabinet document (DELETE .../cabinet-documents/{document_id}). "
             "Requires OAuth/Bearer authorization."
@@ -274,10 +263,9 @@ def register(mcp: FastMCP) -> None:
     async def vehicle_cabinet_delete(
         vehicle_id: int,
         document_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             resp = await st.client.request(
                 "DELETE",

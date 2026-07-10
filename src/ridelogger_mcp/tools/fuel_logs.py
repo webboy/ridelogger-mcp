@@ -11,9 +11,9 @@ from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
+    ToolToken,
     body_from_kwargs,
     compact_query_params,
-    require_token,
     tool_error,
     tool_success,
 )
@@ -23,7 +23,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_list",
         annotations=get_annotations("fuel_logs_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List fuel logs for a vehicle (GET /api/vehicles/{vehicle_id}/fuel_logs). "
             "Requires OAuth/Bearer authorization. Optional page for pagination. "
@@ -39,10 +38,9 @@ def register(mcp: FastMCP) -> None:
         date_to: str | None = None,
         currency_id: int | None = None,
         fuel_type_id: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params = compact_query_params(
                 {
@@ -66,7 +64,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_create",
         annotations=get_annotations("fuel_logs_create"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Create fuel log (POST .../fuel_logs). Requires OAuth/Bearer authorization. "
             "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, fuel_type_id) "
@@ -93,10 +90,9 @@ def register(mcp: FastMCP) -> None:
         latitude: float | None = None,
         longitude: float | None = None,
         rating: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 amount=amount,
                 currency_id=currency_id,
@@ -127,7 +123,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_get",
         annotations=get_annotations("fuel_logs_get"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Get one fuel log (GET .../fuel_logs/{fuel_log_id}). Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -136,10 +131,9 @@ def register(mcp: FastMCP) -> None:
     async def fuel_logs_get(
         vehicle_id: int,
         fuel_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -153,7 +147,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_update",
         annotations=get_annotations("fuel_logs_update"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Update fuel log (PUT .../fuel_logs/{fuel_log_id}). Requires OAuth/Bearer authorization. "
             "Optional fields per FuelLogUpdateRequest (fuel row) plus vehicle log fields amount, currency_id, "
@@ -178,10 +171,9 @@ def register(mcp: FastMCP) -> None:
         latitude: float | None = None,
         longitude: float | None = None,
         rating: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 amount=amount,
                 currency_id=currency_id,
@@ -213,7 +205,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="fuel_logs_delete",
         annotations=get_annotations("fuel_logs_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete fuel log (DELETE .../fuel_logs/{fuel_log_id}). Requires OAuth/Bearer authorization."
         ),
@@ -221,10 +212,9 @@ def register(mcp: FastMCP) -> None:
     async def fuel_logs_delete(
         vehicle_id: int,
         fuel_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",

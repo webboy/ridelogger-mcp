@@ -71,7 +71,7 @@ def _build_dummy_arguments(parameters: dict[str, Any]) -> dict[str, Any]:
         if val is None:
             val = _coerce_leaf(fragment)
 
-        if key in {"access_token", "bearer"}:
+        if key in {"bearer"}:
             val = "__stub-token__"
 
         if val is None and key in required:
@@ -92,13 +92,10 @@ def _build_dummy_arguments(parameters: dict[str, Any]) -> dict[str, Any]:
 
 def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Resolve mutually-exclusive parameter groups modeled in tool implementations."""
-    stub = "__stub-token__"
-
     if tool_name == "vehicle_log_files_upload":
         return {
             "vehicle_id": int(args.get("vehicle_id", 1)),
             "vehicle_log_id": int(args.get("vehicle_log_id", 1)),
-            "access_token": stub,
             "file_name": "e2e.bin",
             "file_base64": _MIN_PNG_B64,
         }
@@ -107,14 +104,12 @@ def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, A
         return {
             "vehicle_id": int(args.get("vehicle_id", 1)),
             "vehicle_log_id": int(args.get("vehicle_log_id", 1)),
-            "access_token": stub,
             "vehicle_log_file": _MIN_PNG_B64,
             "vehicle_log_file_name": "tiny.png",
         }
 
     if tool_name == "user_avatar_upload":
         return {
-            "access_token": stub,
             "file_name": "avatar.png",
             "file_base64": _MIN_PNG_B64,
         }
@@ -122,7 +117,6 @@ def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, A
     if tool_name == "vehicle_images_create":
         return {
             "vehicle_id": int(args.get("vehicle_id", 1)),
-            "access_token": stub,
             "file_name": "img.png",
             "file_base64": _MIN_PNG_B64,
         }
@@ -132,7 +126,6 @@ def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, A
             "vehicle_id": int(args.get("vehicle_id", 1)),
             "title": str(args.get("title") or "E2E title"),
             "document_category": str(args.get("document_category") or "other"),
-            "access_token": stub,
             "file_name": "doc.pdf",
             "file_base64": _MIN_PNG_B64,
         }
@@ -141,12 +134,11 @@ def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, A
         return {
             "vehicle_id": int(args.get("vehicle_id", 1)),
             "document_id": int(args.get("document_id", 1)),
-            "access_token": stub,
             "title": "Updated title",
         }
 
     if tool_name != "reference_data_refresh":
-        args.setdefault("access_token", stub)
+        pass
 
     return args
 
@@ -159,7 +151,11 @@ class _UpstreamStubState:
 
 
 @pytest.fixture(autouse=True)
-def _stub_app_state() -> Any:
+def _stub_app_state(monkeypatch: pytest.MonkeyPatch) -> Any:
+    monkeypatch.setattr(
+        "ridelogger_mcp.bearer_auth.get_http_bearer_token",
+        lambda: "__stub-token__",
+    )
     class StubCache:
         async def refresh(self) -> None:
             return None

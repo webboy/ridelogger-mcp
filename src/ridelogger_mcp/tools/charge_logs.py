@@ -12,9 +12,9 @@ from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
+    ToolToken,
     body_from_kwargs,
     compact_query_params,
-    require_token,
     tool_error,
     tool_success,
 )
@@ -41,7 +41,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_list",
         annotations=get_annotations("charge_logs_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List charge logs for a vehicle (GET /api/vehicles/{vehicle_id}/charge_logs). "
             "Requires OAuth/Bearer authorization. Optional page for pagination. "
@@ -57,10 +56,9 @@ def register(mcp: FastMCP) -> None:
         date_to: str | None = None,
         currency_id: int | None = None,
         charge_type_id: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params = compact_query_params(
                 {
@@ -84,7 +82,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_create",
         annotations=get_annotations("charge_logs_create"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Create charge log (POST .../charge_logs). Requires OAuth/Bearer authorization. "
             "ChargeLogStoreRequest: amount, currency_id, mileage, date (YYYY-MM-DD), and energy are required. "
@@ -110,10 +107,9 @@ def register(mcp: FastMCP) -> None:
         latitude: float | None = None,
         longitude: float | None = None,
         rating: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 amount=amount,
                 currency_id=currency_id,
@@ -144,7 +140,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_get",
         annotations=get_annotations("charge_logs_get"),
-        exclude_args=["access_token"],
         description=(
             "[READ] Get one charge log (GET .../charge_logs/{charge_log_id}). vehicle_log id. Requires OAuth/Bearer authorization. "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
@@ -153,10 +148,9 @@ def register(mcp: FastMCP) -> None:
     async def charge_logs_get(
         vehicle_id: int,
         charge_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -170,7 +164,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_update",
         annotations=get_annotations("charge_logs_update"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Update charge log (PUT .../charge_logs/{charge_log_id}). vehicle_log id. "
             "Optional ChargeLogUpdateRequest fields + vehicle log amount, currency_id, mileage, date. "
@@ -194,10 +187,9 @@ def register(mcp: FastMCP) -> None:
         latitude: float | None = None,
         longitude: float | None = None,
         rating: int | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(
                 amount=amount,
                 currency_id=currency_id,
@@ -229,7 +221,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="charge_logs_delete",
         annotations=get_annotations("charge_logs_delete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Delete charge log (DELETE .../charge_logs/{charge_log_id}). vehicle_log id. Requires OAuth/Bearer authorization."
         ),
@@ -237,10 +228,9 @@ def register(mcp: FastMCP) -> None:
     async def charge_logs_delete(
         vehicle_id: int,
         charge_log_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",

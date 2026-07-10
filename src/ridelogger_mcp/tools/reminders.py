@@ -9,7 +9,7 @@ from pydantic import Field
 
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
-from ridelogger_mcp.tools.common import body_from_kwargs, compact_query_params, require_token, tool_error, tool_success
+from ridelogger_mcp.tools.common import body_from_kwargs, compact_query_params, tool_error, tool_success, ToolToken
 
 ReminderStatus = Literal["active", "passed", "canceled", "completed"]
 AlarmTypeId = Literal[1, 2, 3]
@@ -29,17 +29,15 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_slots_list",
         annotations=get_annotations("reminder_slots_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List built-in reminder slots (GET /api/reminder_slots). "
             "Public reference data: slug, default alarm type, default intervals."
         ),
     )
     async def reminder_slots_list(
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -53,7 +51,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_list",
         annotations=get_annotations("reminder_list"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List reminders for a vehicle (GET /api/vehicles/{vehicle_id}/reminders). "
             "Optional status filter must be one of: active, passed, canceled, completed. Requires OAuth/Bearer authorization."
@@ -62,10 +59,9 @@ def register(mcp: FastMCP) -> None:
     async def reminder_list(
         vehicle_id: int,
         status: ReminderStatus | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params = compact_query_params({"status": status})
             data = await st.client.request_json(
@@ -81,7 +77,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_list_user",
         annotations=get_annotations("reminder_list_user"),
-        exclude_args=["access_token"],
         description=(
             "[READ] List reminders for the authenticated user across vehicles "
             "(GET /api/user/reminders). Optional status filter must be one of: active, passed, canceled, completed."
@@ -89,10 +84,9 @@ def register(mcp: FastMCP) -> None:
     )
     async def reminder_list_user(
         status: ReminderStatus | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             params = compact_query_params({"status": status})
             data = await st.client.request_json(
@@ -108,16 +102,14 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_show",
         annotations=get_annotations("reminder_show"),
-        exclude_args=["access_token"],
         description="[READ] Get one reminder (GET /api/vehicles/{vehicle_id}/reminders/{reminder_id}).",
     )
     async def reminder_show(
         vehicle_id: int,
         reminder_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "GET",
@@ -131,7 +123,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_create",
         annotations=get_annotations("reminder_create"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Create reminder (POST /api/vehicles/{vehicle_id}/reminders). "
             "Built-in slots (reminder_slot_id): 1=Technical inspection, 2=Oil change, "
@@ -157,10 +148,9 @@ def register(mcp: FastMCP) -> None:
         interval_days: int | None = None,
         name: str | None = None,
         description: str | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             _validate_reminder_create(
                 alarm_type_id=alarm_type_id,
                 reminder_slot_id=reminder_slot_id,
@@ -192,7 +182,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_update",
         annotations=get_annotations("reminder_update"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Update custom reminder name/description only "
             "(PUT /api/vehicles/{vehicle_id}/reminders/{reminder_id})."
@@ -203,10 +192,9 @@ def register(mcp: FastMCP) -> None:
         reminder_id: int,
         name: str | None = None,
         description: str | None = None,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             body = body_from_kwargs(name=name, description=description)
             st = get_state()
             data = await st.client.request_json(
@@ -221,16 +209,14 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_delete",
         annotations=get_annotations("reminder_delete"),
-        exclude_args=["access_token"],
         description="[WRITE] Delete reminder (DELETE .../reminders/{reminder_id}). Confirmation recommended.",
     )
     async def reminder_delete(
         vehicle_id: int,
         reminder_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "DELETE",
@@ -243,7 +229,6 @@ def register(mcp: FastMCP) -> None:
     @mcp.tool(
         name="reminder_complete",
         annotations=get_annotations("reminder_complete"),
-        exclude_args=["access_token"],
         description=(
             "[WRITE] Mark reminder complete; recurring creates next (POST .../reminders/{reminder_id}/complete)."
         ),
@@ -251,10 +236,9 @@ def register(mcp: FastMCP) -> None:
     async def reminder_complete(
         vehicle_id: int,
         reminder_id: int,
-        access_token: str | None = None,
+        token: str = ToolToken,
     ) -> dict[str, Any]:
         try:
-            token = require_token(access_token)
             st = get_state()
             data = await st.client.request_json(
                 "POST",
