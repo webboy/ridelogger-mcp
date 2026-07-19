@@ -116,6 +116,34 @@ def test_auth_me_settings_only_allowlist() -> None:
     }
 
 
+def test_sanitize_tool_data_preserves_additive_vehicle_composition_fields() -> None:
+    payload = {
+        "data": {
+            "id": 42,
+            "mileage": 12000,
+            "vin": "WBAAA11111111111",
+            "meters": [
+                {
+                    "id": 10,
+                    "meter_type_id": 1,
+                    "current_value": 12000,
+                    "is_primary": True,
+                }
+            ],
+            "tanks": [],
+            "batteries": [],
+            "identifiers": [{"id": 30, "value": "WBAAA11111111111"}],
+            "readings": [{"vehicle_meter_id": 10, "value": 12500}],
+        }
+    }
+
+    sanitized = sanitize_tool_data(payload)
+
+    assert sanitized["data"]["mileage"] == 12000
+    assert sanitized["data"]["meters"][0]["current_value"] == 12000
+    assert sanitized["data"]["readings"][0]["value"] == 12500
+
+
 def test_upstream_402_error_message_is_neutral() -> None:
     import httpx
 
