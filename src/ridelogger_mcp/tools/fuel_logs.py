@@ -9,6 +9,7 @@ from fastmcp import FastMCP
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
+    LOG_MILEAGE_HINT,
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
     ToolToken,
@@ -68,6 +69,7 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Create fuel log (POST .../fuel_logs). Requires OAuth/Bearer authorization. "
             "Validated fields include FuelLogStoreRequest (amount, currency_id, unit, mileage, fuel_type_id) "
             "plus date (Y-m-d) for the vehicle log row; optional unit_price, uuid. "
+            + LOG_MILEAGE_HINT + " "
             "Optional unit_id (fuel quantity unit — `GET /api/fuel_units`): when omitted, API defaults from the "
             "user's quantity preference then vehicle fuel unit. "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "

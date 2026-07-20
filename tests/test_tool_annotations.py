@@ -264,5 +264,5 @@ def test_openai_schema_hardening_for_reminder_filters_and_create() -> None:
     props = params["properties"]
     assert props["alarm_type_id"]["enum"] == [1, 2, 3]
     assert props["reminder_slot_id"]["anyOf"][0]["enum"] == [1, 2, 3, 4, 5]
-    assert props["interval_mileage_unit_id"]["anyOf"][0]["enum"] == [1, 2]
+    assert props["interval_mileage_unit_id"]["anyOf"][0]["enum"] == [1, 2, 3]
     assert props["target_date"]["anyOf"][0]["pattern"] == r"^\d{4}-\d{2}-\d{2}$"

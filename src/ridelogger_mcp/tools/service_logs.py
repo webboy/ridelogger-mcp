@@ -9,6 +9,7 @@ from fastmcp import FastMCP
 from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import (
+    LOG_MILEAGE_HINT,
     LOG_REFS_HINT,
     MONEY_LOGS_HINT,
     ToolToken,
@@ -67,6 +68,7 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Create service log (POST .../service_logs). Requires OAuth/Bearer authorization. "
             "ServiceLogStoreRequest: amount, currency_id, mileage, service_type_id, title; "
             "plus date (Y-m-d) for vehicle log; optional description, uuid. "
+            + LOG_MILEAGE_HINT + " "
             "Optional geolocation: business_name, business_address, latitude, longitude; rating (1-5 stars, optional). "
             + MONEY_LOGS_HINT + " " + LOG_REFS_HINT
         ),

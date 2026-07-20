@@ -78,7 +78,7 @@ Payload envelope: `data`, `fetched_at`, `ttl_seconds`, `source_endpoint`.
 |-----|---------|
 | `ridelogger://reference/countries` | Countries |
 | `ridelogger://reference/currencies` | Currencies (codes, rates — use with multi-currency logs) |
-| `ridelogger://reference/vehicle_types` | Vehicle types |
+| `ridelogger://reference/vehicle_types` | Vehicle types (includes agri ids **4–7**: tractor, combine, trailer_attachment, work_machine) |
 | `ridelogger://reference/vehicle_makes` | Vehicle makes |
 | `ridelogger://reference/fuel_types` | Fuel types |
 | `ridelogger://reference/fuel_units` | Fuel units |
@@ -87,7 +87,7 @@ Payload envelope: `data`, `fetched_at`, `ttl_seconds`, `source_endpoint`.
 | `ridelogger://reference/powertrain_types` | Vehicle powertrain (ICE, HEV, PHEV, BEV) |
 | `ridelogger://reference/service_types` | Service types |
 | `ridelogger://reference/expense_types` | Expense types |
-| `ridelogger://reference/mileage_units` | Mileage units |
+| `ridelogger://reference/mileage_units` | Mileage units (1=km, 2=mile, **3=hour** for agri engine hours) |
 | `ridelogger://reference/steering_sides` | Steering side (LHD/RHD) |
 | `ridelogger://reference/fuel_consumption_units` | Fuel consumption display units (l/100km, MPG variants) |
 
