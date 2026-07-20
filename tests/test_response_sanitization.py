@@ -144,6 +144,35 @@ def test_sanitize_tool_data_preserves_additive_vehicle_composition_fields() -> N
     assert sanitized["data"]["readings"][0]["value"] == 12500
 
 
+def test_sanitize_tool_data_preserves_agri_composition_fields() -> None:
+    payload = {
+        "data": {
+            "id": 99,
+            "vehicle_type_id": 4,
+            "vehicle_model_label": "T7.270",
+            "mileage": 1200,
+            "mileage_unit_id": 3,
+            "make": {"id": 10, "name": "New Holland"},
+            "model": {"id": None, "name": "T7.270"},
+            "meters": [
+                {
+                    "id": 11,
+                    "meter_type_id": 2,
+                    "unit_id": 3,
+                    "current_value": 1200,
+                    "is_primary": True,
+                }
+            ],
+        }
+    }
+
+    sanitized = sanitize_tool_data(payload)
+
+    assert sanitized["data"]["vehicle_model_label"] == "T7.270"
+    assert sanitized["data"]["make"]["name"] == "New Holland"
+    assert sanitized["data"]["meters"][0]["unit_id"] == 3
+
+
 def test_upstream_402_error_message_is_neutral() -> None:
     import httpx
 

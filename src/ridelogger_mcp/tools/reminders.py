@@ -14,7 +14,7 @@ from ridelogger_mcp.tools.common import body_from_kwargs, compact_query_params, 
 ReminderStatus = Literal["active", "passed", "canceled", "completed"]
 AlarmTypeId = Literal[1, 2, 3]
 ReminderSlotId = Literal[1, 2, 3, 4, 5]
-MileageUnitId = Literal[1, 2]
+MileageUnitId = Literal[1, 2, 3]
 
 ReminderDate = Annotated[
     str,
@@ -131,6 +131,7 @@ def register(mcp: FastMCP) -> None:
             "Custom reminders may not be available for every account; if unavailable, the API returns a permission error. "
             "alarm_type_id: 1=DATE requires target_date, 2=MILEAGE requires target_mileage, "
             "3=ANY requires both target_date and target_mileage. "
+            "interval_mileage_unit_id: 1=km, 2=mile, 3=hour (agri engine hours). "
             "Optional interval_* for recurring."
         ),
     )

@@ -10,6 +10,13 @@ from ridelogger_mcp.state import get_state
 from ridelogger_mcp.tool_semantics import get_annotations
 from ridelogger_mcp.tools.common import VEHICLE_REFS_HINT, body_from_kwargs, tool_error, tool_success, ToolToken
 
+_AGRI_CREATE_HINT = (
+    "Agri types 4–7: catalog vehicle_make_id is required; use vehicle_model_label (free text) when "
+    "vehicle_model_id is omitted. Types 4/5/7 require mileage as primary engine hours — set "
+    "mileage_unit_id=3 (HOUR). Type 6 (trailer_attachment) may omit mileage and fuel_type_id on create "
+    "(no primary meter by default). Cars (1) still require vehicle_model_id from catalog."
+)
+
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(
@@ -57,25 +64,28 @@ def register(mcp: FastMCP) -> None:
         annotations=get_annotations("vehicles_create"),
         description=(
             "[WRITE] Create a vehicle (POST /api/vehicles). Requires OAuth/Bearer authorization. "
-            "Body matches VehicleStoreRequest in ridelogger-api: vehicle_type_id, vehicle_make_id, mileage, "
-            "fuel_type_id, label, production_year are required; vehicle_model_id is required "
-            "when vehicle_type_id is 1 (car). Optional: mileage_unit_id (defaults from owner country), "
-            "steering_side_id (`GET /api/steering_sides`, defaults from owner country). "
-            "Optional: plate, valid_to, engine_displacement, engine_power_kw, "
-            "engine_power_hp. "
+            "Body matches VehicleStoreRequest in ridelogger-api. "
+            "Road types 1–3: vehicle_type_id, vehicle_make_id, mileage, fuel_type_id, label, production_year; "
+            "vehicle_model_id required for cars (type 1). "
+            + _AGRI_CREATE_HINT
+            + " Optional: mileage_unit_id (defaults from owner country; use 3 for agri hours), "
+            "steering_side_id (`GET /api/steering_sides`, defaults from owner country), "
+            "vehicle_model_label, nested make/model write shapes accepted by API. "
+            "Optional: plate, valid_to, engine_displacement, engine_power_kw, engine_power_hp. "
             "Response includes the created vehicle. " + VEHICLE_REFS_HINT
         ),
     )
     async def vehicles_create(
         vehicle_type_id: int,
         vehicle_make_id: int,
-        mileage: int,
-        fuel_type_id: int,
         label: str,
         production_year: int,
+        mileage: int | None = None,
+        fuel_type_id: int | None = None,
         mileage_unit_id: int | None = None,
         steering_side_id: int | None = None,
         vehicle_model_id: int | None = None,
+        vehicle_model_label: str | None = None,
         plate: str | None = None,
         valid_to: str | None = None,
         engine_displacement: int | None = None,
@@ -88,6 +98,7 @@ def register(mcp: FastMCP) -> None:
                 vehicle_type_id=vehicle_type_id,
                 vehicle_make_id=vehicle_make_id,
                 vehicle_model_id=vehicle_model_id,
+                vehicle_model_label=vehicle_model_label,
                 mileage=mileage,
                 mileage_unit_id=mileage_unit_id,
                 steering_side_id=steering_side_id,
@@ -138,9 +149,9 @@ def register(mcp: FastMCP) -> None:
             "[WRITE] Partial update vehicle (PUT /api/vehicles/{vehicle_id}). Requires OAuth/Bearer authorization. "
             "Only **vehicle_id** is required; include **only fields that change** (API merges with existing row). "
             "Omitted parameters are not sent. **mileage_unit_id** cannot be changed after create — omit it on update. "
-            "For **cars** (vehicle_type_id=1), set **vehicle_make_id** and "
-            "**vehicle_model_id** from reference data when you change identity; omit **vehicle_model_id** for "
-            "motorcycles/trucks. Do not send null for unknown IDs — omit the key instead. "
+            "For **cars** (vehicle_type_id=1), set **vehicle_make_id** and **vehicle_model_id** from reference data. "
+            "Agri types 4–7 may use **vehicle_model_label** instead of catalog model id. "
+            "Do not send null for unknown IDs — omit the key instead. "
             "Optional: steering_side_id (`GET /api/steering_sides`), powertrain_id, plate, valid_to, country_id "
             "(with plate), engine_*. "
             + VEHICLE_REFS_HINT
@@ -151,6 +162,7 @@ def register(mcp: FastMCP) -> None:
         vehicle_type_id: int | None = None,
         vehicle_make_id: int | None = None,
         vehicle_model_id: int | None = None,
+        vehicle_model_label: str | None = None,
         mileage: int | None = None,
         steering_side_id: int | None = None,
         fuel_type_id: int | None = None,
@@ -170,6 +182,7 @@ def register(mcp: FastMCP) -> None:
                 vehicle_type_id=vehicle_type_id,
                 vehicle_make_id=vehicle_make_id,
                 vehicle_model_id=vehicle_model_id,
+                vehicle_model_label=vehicle_model_label,
                 mileage=mileage,
                 steering_side_id=steering_side_id,
                 fuel_type_id=fuel_type_id,

@@ -28,10 +28,19 @@ MONEY_LOGS_HINT = (
 # Embedded reference objects in vehicle responses (API v1.3+).
 VEHICLE_REFS_HINT = (
     "Each vehicle includes resolved reference objects alongside raw IDs: "
-    "vehicle_type {id,name}, fuel_type {id,name}, mileage_unit {id,name,unit,ratio}, "
-    "steering_side {id,name}, "
-    "fuel_unit {id,name,unit,units,ratio}, vehicle_make_info {id,name}, vehicle_model_info {id,name}. "
+    "vehicle_type {id,name}, fuel_type {id,name}, mileage_unit {id,name,unit,ratio} "
+    "(1=km, 2=mile, 3=hour for agri engine hours), steering_side {id,name}, "
+    "fuel_unit {id,name,unit,units,ratio}, vehicle_make_info {id,name}, vehicle_model_info {id,name}, "
+    "nested make/model objects when present, and vehicle_model_label for free-text agri models. "
+    "vehicle_type_id 4=tractor, 5=combine, 6=trailer_attachment, 7=work_machine use primary meter hours "
+    "when a meter exists; type 6 may have no primary meter on create. "
     "Use these instead of cross-referencing IDs with ridelogger://reference/* resources."
+)
+
+# Log mileage field mirrors the vehicle primary meter (km or engine hours).
+LOG_MILEAGE_HINT = (
+    "mileage on log rows mirrors the vehicle primary meter value (odometer km/mile or engine hours for agri). "
+    "For trailer_attachment (type 6) without a primary meter, service/expense mileage may be omitted per API."
 )
 
 # Embedded reference objects in log responses (API v1.3+).
