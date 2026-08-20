@@ -80,7 +80,7 @@ MCP protocol requests that do not call tools (`initialize`, `tools/list`, `resou
 
 ### 3. OAuth resource-server metadata (`auth_provider.py`)
 
-- `OAUTH_SCOPES` — 8 scopes: `profile:read`, `vehicles:read/write`, `logs:read/write`, `files:read/write`, `reminders:read`.
+- `OAUTH_SCOPES` — 9 scopes: `profile:read`, `vehicles:read/write`, `logs:read/write`, `files:read/write`, `reminders:read/write`.
 - `RideLoggerTokenVerifier` — a FastMCP `TokenVerifier` that validates tokens against `GET /api/auth/me` and returns an `AccessToken` with `user_id` claim.
 - `create_auth_provider()` — builds a `RemoteAuthProvider` (authorization server = ridelogger-api, resource = this server).
 

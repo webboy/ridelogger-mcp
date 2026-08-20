@@ -194,7 +194,7 @@ All `application/json`; envelope `{data, fetched_at, ttl_seconds, source_endpoin
 
 - MCP **discovery is public** (`initialize`, `tools/list`, `resources/list`) so OpenAI Platform and other clients can scan the server without credentials.
 - Clients discover the authorization server from the protected-resource metadata (`OAUTH_AUTHORIZATION_SERVER`, default `https://api.ridelogger.com`) and run the OAuth flow against ridelogger-api.
-- Supported scopes: `profile:read`, `vehicles:read`, `vehicles:write`, `logs:read`, `logs:write`, `files:read`, `files:write`, `reminders:read`.
+- Supported scopes: `profile:read`, `vehicles:read`, `vehicles:write`, `logs:read`, `logs:write`, `files:read`, `files:write`, `reminders:read`, `reminders:write`.
 - The obtained token is sent as `Authorization: Bearer` on MCP HTTP requests; the server validates it per tool call against `GET /api/auth/me` (`RideLoggerBearerMiddleware`).
 - ChatGPT App submission metadata lives in `chatgpt-app-submission.json` at the repo root.
 
