@@ -687,41 +687,41 @@
       "user_prompt": "Show my RideLogger preferred currency and list my vehicles so I can choose which one to work on.",
       "file_attachment_urls": null,
       "tools_triggered": "auth_me, vehicles_list",
-      "expected_output": "Returns the user's account settings (preferred currency, units) and vehicle list with enough detail to choose a vehicle. No personal identity fields are included.",
+      "expected_output": "Returns the user's account settings (preferred currency, units) and a vehicle list with make, model, year, plate, and mileage so the reviewer can pick the Toyota Corolla. No personal identity fields (name, email, phone) are included.",
       "expected_output_url": null
     },
     {
-      "description": "Summarize vehicle costs across multi-currency log categories.",
-      "user_prompt": "For vehicle 12, summarize my fuel, charging, service, and expense costs from 2026-01-01 to 2026-03-31 in my preferred currency.",
+      "description": "Summarize fuel, service, and expense costs for the demo Toyota Corolla in EUR.",
+      "user_prompt": "For my Toyota Corolla (plate M-RL 2020), summarize my fuel, service, and expense costs from 2026-01-01 to 2026-03-31 in my preferred currency.",
       "file_attachment_urls": null,
-      "tools_triggered": "auth_me, fuel_logs_list, charge_logs_list, service_logs_list, expense_logs_list",
-      "expected_output": "Returns category totals and notes that row currencies must be normalized before aggregation.",
+      "tools_triggered": "vehicles_list, auth_me, fuel_logs_list, service_logs_list, expense_logs_list",
+      "expected_output": "Resolves the Corolla by name or plate, lists fuel/service/expense logs in the date range, and returns category totals in the user's preferred currency (EUR for the demo account). Does not call charge_logs_list because the demo vehicle is gasoline-only.",
       "expected_output_url": null
     },
     {
-      "description": "Create a new fuel log with typed vehicle-log fields.",
-      "user_prompt": "Add a fuel log for vehicle 12: quantity 54.2, amount 92.10, currency ID 1, mileage 84200, fuel type ID 2, on 2026-06-18.",
+      "description": "Create a new fuel log with natural-language quantity and odometer above current mileage.",
+      "user_prompt": "Add a fuel fill for my Toyota Corolla (plate M-RL 2020): 54.2 litres of gasoline, 92.10 EUR, odometer 104050, on 2026-08-20.",
       "file_attachment_urls": null,
-      "tools_triggered": "fuel_logs_create",
-      "expected_output": "Creates the private fuel log and returns the saved record with its resolved fuel type, quantity unit, and currency details.",
+      "tools_triggered": "vehicles_list, fuel_logs_create",
+      "expected_output": "Creates a private fuel log for the Corolla and returns the saved record with resolved fuel type (gasoline), quantity unit (litres), currency (EUR), mileage, and date. Odometer is at or above the vehicle's current mileage.",
       "expected_output_url": null
     },
     {
-      "description": "Upload a private vehicle document from a chat attachment.",
-      "user_prompt": "Attach this registration PDF to vehicle 12's cabinet as Registration, issued on 2026-05-01.",
+      "description": "Upload a private vehicle document from a chat attachment using native OpenAI file params.",
+      "user_prompt": "Attach this PDF to my Toyota Corolla (plate M-RL 2020) vehicle cabinet as title Vehicle registration sample, document category Ostalo, issued on 2026-05-01.",
       "file_attachment_urls": [
-        "https://example.com/sample-registration.pdf"
+        "https://www.ridelogger.com/openai-review/sample-vehicle-document.pdf"
       ],
-      "tools_triggered": "vehicle_cabinet_create",
-      "expected_output": "Creates a private cabinet document record linked to the selected vehicle and uploaded file.",
+      "tools_triggered": "vehicles_list, vehicle_cabinet_create",
+      "expected_output": "Downloads or receives the attached PDF via ChatGPT file injection, creates a private cabinet document on the Corolla with title and category Ostalo, and returns the saved document record without unnecessary personal data.",
       "expected_output_url": null
     },
     {
-      "description": "Complete an existing reminder after user confirmation.",
-      "user_prompt": "Mark reminder 44 complete for vehicle 12; I confirm this should update the reminder state.",
+      "description": "Complete an existing mileage reminder after listing and user confirmation.",
+      "user_prompt": "List active reminders for my Toyota Corolla (plate M-RL 2020), then mark the reminder named Oil + filter change complete. I confirm this should update the reminder state.",
       "file_attachment_urls": null,
-      "tools_triggered": "reminder_complete",
-      "expected_output": "Marks the reminder complete and reports the updated reminder state, including any recurring follow-up created by RideLogger.",
+      "tools_triggered": "vehicles_list, reminder_list, reminder_complete",
+      "expected_output": "Lists active reminders for the Corolla, completes Oil + filter change, and reports the updated reminder state (completed). If the reminder is recurring, notes any follow-up mileage target RideLogger created.",
       "expected_output_url": null
     }
   ],
