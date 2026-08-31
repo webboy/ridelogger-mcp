@@ -111,7 +111,7 @@ Orchestrators (e.g. **ridelogger-ai**) need machine-readable planner hints. Thes
 
 ## MCP tools (full catalog)
 
-**56 tools.** Full catalog with read/write/destructive classification: **[`docs/FEATURES.md`](docs/FEATURES.md)**. Architecture details: **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)**.
+**57 tools.** Full catalog with read/write/destructive classification: **[`docs/FEATURES.md`](docs/FEATURES.md)**. Architecture details: **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)**.
 
 **Auth:** MCP discovery requests (`initialize`, `tools/list`, `resources/list`) are public so ChatGPT/OpenAI Platform and other clients can scan the server. User-data tool calls require OAuth/Bearer and should send `Authorization: Bearer <token>` on MCP HTTP requests. The tool-call middleware validates the token via `/api/auth/me`. No username/password auth tools are exposed.
 
@@ -140,6 +140,7 @@ Implementation: `src/ridelogger_mcp/file_inputs.py`.
 | Tool | Token | Description |
 |------|-------|-------------|
 | `auth_me` | yes | GET `/api/auth/me` — account settings only (settings allowlist incl. `currency_id` display currency; no profile identity fields). No username/password login tool is exposed. |
+| `reference_data_get` | no | Read cached catalog rows (makes, types, fuels, units). Optional `q` filter. Use before `vehicles_create` to resolve IDs. |
 | `reference_data_refresh` | no | Reload all cached reference datasets from the API. |
 
 **User profile**

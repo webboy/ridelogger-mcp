@@ -4,7 +4,7 @@
 
 > Ecosystem-level documentation: `~/sk/memory/docs/`.
 
-`ridelogger-mcp` is an HTTP [MCP](https://modelcontextprotocol.io/) server built on **FastMCP 2** (Python 3.11+, version **1.2.0**). It is a *thin, typed wrapper* over the RideLogger REST API (`ridelogger-api`): every tool maps to one upstream endpoint, no business logic lives here. It exposes **56 tools**, **15 resources** (14 reference datasets + 1 policy resource), and a handful of custom HTTP routes (health, OAuth metadata, OpenAI Apps challenge).
+`ridelogger-mcp` is an HTTP [MCP](https://modelcontextprotocol.io/) server built on **FastMCP 2** (Python 3.11+, version **1.2.0**). It is a *thin, typed wrapper* over the RideLogger REST API (`ridelogger-api`): every tool maps to one upstream endpoint, no business logic lives here. It exposes **57 tools**, **15 resources** (14 reference datasets + 1 policy resource), and a handful of custom HTTP routes (health, OAuth metadata, OpenAI Apps challenge).
 
 ## High-level flow
 
@@ -15,7 +15,7 @@ MCP client (Cursor / ChatGPT / ridelogger-ai)
 FastMCP app (app.py)
   ├─ ASGI middleware: McpOctetStreamJsonMiddleware (OpenAI scanner compat)
   ├─ MCP middleware: RideLoggerBearerMiddleware (validates Bearer on tool calls)
-  ├─ 56 tools (tools/*.py)  ──►  ApiClient (httpx, HMAC-signed)  ──►  ridelogger-api
+  ├─ 57 tools (tools/*.py)  ──►  ApiClient (httpx, HMAC-signed)  ──►  ridelogger-api
   └─ 15 resources (resources.py) ──► ReferenceCache (in-memory, TTL refresh)
 ```
 
@@ -150,13 +150,13 @@ Legacy sources unchanged: RideLogger `chat_upload_id` (internal UUID) and base64
 
 ### `resources.py`
 
-Registers one MCP resource per dataset at **`ridelogger://reference/{name}`** (`application/json`, the envelope above) plus the policy resource **`ridelogger://policy/tool-semantics`** (see below). The tool `reference_data_refresh` forces a cache reload on demand.
+Registers one MCP resource per dataset at **`ridelogger://reference/{name}`** (`application/json`, the envelope above) plus the policy resource **`ridelogger://policy/tool-semantics`** (see below). ChatGPT Apps typically **cannot read MCP resources**; clients should call `reference_data_get` to look up catalog IDs. `reference_data_refresh` forces a cache reload on demand.
 
 ## Tool semantics policy (`tool_semantics.py`)
 
 Single source of truth for per-tool safety metadata, consumed both by MCP clients (as FastMCP annotations) and by the **ridelogger-ai orchestrator** (as an MCP resource).
 
-- `REGISTERED_TOOL_NAMES` — frozenset of all 56 tool names; must match every `@mcp.tool` in `tools/*.py`.
+- `REGISTERED_TOOL_NAMES` — frozenset of all 57 tool names; must match every `@mcp.tool` in `tools/*.py`.
 - `TOOL_SEMANTICS` — maps each name to a policy dict (`kind`, `category` acquisition/execution, `mutation`, `confirmation` none/recommended/required, `risk`/`risk_level`, `side_effect_scope`, `idempotency`, `requires`, `provides`), built with `_read()` / `_write()` helpers.
 - `MCP_NON_READ_ONLY_TOOLS` — currently only `reference_data_refresh` (mutates MCP server state, not user data).
 - `MCP_DESTRUCTIVE_HINT_TOOLS` — updates/overwrites flagged destructive for ChatGPT Apps without raising RideLogger's internal risk level.

@@ -137,6 +137,9 @@ def finalize_tool_arguments(tool_name: str, args: dict[str, Any]) -> dict[str, A
             "title": "Updated title",
         }
 
+    if tool_name == "reference_data_get":
+        return {"dataset": "vehicle_makes", "q": "Claas", "limit": 20}
+
     if tool_name != "reference_data_refresh":
         pass
 
@@ -161,6 +164,9 @@ def _stub_app_state(monkeypatch: pytest.MonkeyPatch) -> Any:
             return None
 
         def loaded_dataset_names(self) -> list[str]:
+            return []
+
+        def rows(self, name: str) -> list[dict[str, Any]]:
             return []
 
     async def json_ok(*_: Any, **__: Any) -> dict[str, Any]:

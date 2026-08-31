@@ -4,7 +4,7 @@
 
 > Ecosystem-level documentation: `~/sk/memory/docs/`.
 
-This document enumerates everything the MCP server exposes: **56 tools**, **15 MCP resources**, custom HTTP endpoints, and client-integration features. Source of truth in code: `src/ridelogger_mcp/tool_semantics.py` (`REGISTERED_TOOL_NAMES`, `TOOL_SEMANTICS`) and `src/ridelogger_mcp/tools/*.py`; the pytest suite `tests/test_tool_annotations.py` fails if they drift.
+This document enumerates everything the MCP server exposes: **57 tools**, **15 MCP resources**, custom HTTP endpoints, and client-integration features. Source of truth in code: `src/ridelogger_mcp/tool_semantics.py` (`REGISTERED_TOOL_NAMES`, `TOOL_SEMANTICS`) and `src/ridelogger_mcp/tools/*.py`; the pytest suite `tests/test_tool_annotations.py` fails if they drift.
 
 ## Classification legend
 
@@ -16,9 +16,9 @@ Derived from `TOOL_SEMANTICS` and the FastMCP annotations built from it:
 | **Write** | `mutation=True`, additive create/upload — `destructiveHint=False` |
 | **Write (destructive)** | `mutation=True` and `destructiveHint=True` — deletes, overwrites, or irreversibly advances user data. Deletes additionally carry `risk=high` / `confirmation=required`; updates/overwrites carry `confirmation=recommended` |
 
-All tools have `openWorldHint=False` (bounded user data). All tools except `reference_data_refresh` require OAuth/Bearer authorization (token validated upstream via `GET /api/auth/me`). `reminder_slots_list` serves public reference data upstream but the tool itself still requires a token.
+All tools have `openWorldHint=False` (bounded user data). All tools except `reference_data_refresh` and `reference_data_get` require OAuth/Bearer authorization (token validated upstream via `GET /api/auth/me`). `reminder_slots_list` serves public reference data upstream but the tool itself still requires a token. `reference_data_get` reads the public catalog cache (no token).
 
-## Tool catalog (56 tools)
+## Tool catalog (57 tools)
 
 ### Auth (1)
 
@@ -142,10 +142,11 @@ No username/password login tools are exposed — authentication happens via the 
 | `reminder_delete` | Delete reminder (DELETE) | Write (destructive, confirmation required) |
 | `reminder_complete` | Mark complete; recurring reminders spawn the next occurrence (POST `.../complete`) | Write (destructive — irreversibly advances state) |
 
-### Reference (1)
+### Reference (2)
 
 | Tool | Purpose | Class |
 |---|---|---|
+| `reference_data_get` | Read cached catalog rows (`vehicle_makes`, `fuel_types`, …); optional `q` + `limit`. No token. Use to resolve IDs before `vehicles_create` | Read |
 | `reference_data_refresh` | Reload all cached reference datasets from the API (no token) | Described as `[WRITE]` with `readOnlyHint=False` — it mutates the MCP server's cache (never user records); internal semantics stay `mutation=False` |
 
 ## MCP resources (15)

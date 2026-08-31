@@ -65,6 +65,7 @@ REGISTERED_TOOL_NAMES: frozenset[str] = frozenset(
         "vehicle_log_files_upload_base64",
         "vehicle_log_files_delete",
         "vehicle_log_files_download",
+        "reference_data_get",
         "reference_data_refresh",
         "reminder_slots_list",
         "reminder_list",
@@ -161,6 +162,7 @@ def _write(
 # Single source of truth: tool name -> policy (x-ridelogger-compatible shape).
 TOOL_SEMANTICS: dict[str, dict[str, Any]] = {
     "auth_me": _read("account", risk="low", provides=["user_profile", "preferred_currency_id"]),
+    "reference_data_get": _read("session", provides=["reference_data"]),
     "user_avatar_upload": _write("account", confirmation="recommended", requires=["file"], provides=["user_profile"]),
     "reference_data_refresh": _read(
         "session",
