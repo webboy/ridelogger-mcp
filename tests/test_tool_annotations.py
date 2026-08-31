@@ -135,6 +135,7 @@ def test_list_tools_read_only_tools_correct() -> None:
         t = tool_map[name]
         assert t.annotations.readOnlyHint is True, f"{name}: expected readOnlyHint=True"
 
+    assert tool_map["reference_data_get"].annotations.readOnlyHint is True
     assert tool_map["reference_data_refresh"].annotations.readOnlyHint is False
 
 

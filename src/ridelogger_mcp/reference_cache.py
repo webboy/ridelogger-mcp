@@ -13,6 +13,33 @@ from ridelogger_mcp.reference_paths import REFERENCE_PATHS
 
 logger = logging.getLogger(__name__)
 
+_ROW_SEARCH_KEYS = ("name", "label", "slug", "code", "short_name")
+
+
+def _rows_from_payload(payload: Any) -> list[dict[str, Any]]:
+    if payload is None:
+        return []
+    if isinstance(payload, list):
+        return [row for row in payload if isinstance(row, dict)]
+    if isinstance(payload, dict):
+        inner = payload.get("data")
+        if isinstance(inner, list):
+            return [row for row in inner if isinstance(row, dict)]
+        if isinstance(inner, dict) and isinstance(inner.get("data"), list):
+            return [row for row in inner["data"] if isinstance(row, dict)]
+    return []
+
+
+def row_matches_query(row: dict[str, Any], query: str) -> bool:
+    needle = query.casefold().strip()
+    if not needle:
+        return True
+    for key in _ROW_SEARCH_KEYS:
+        value = row.get(key)
+        if isinstance(value, str) and needle in value.casefold():
+            return True
+    return False
+
 
 class ReferenceCache:
     def __init__(self, settings: Settings, client: ApiClient) -> None:
@@ -56,6 +83,12 @@ class ReferenceCache:
 
     def loaded_dataset_names(self) -> list[str]:
         return sorted(self._data.keys())
+
+    def rows(self, name: str) -> list[dict[str, Any]]:
+        """Flatten a cached dataset to a list of row dicts."""
+        if name not in REFERENCE_PATHS:
+            raise KeyError(f"Unknown reference dataset: {name}")
+        return _rows_from_payload(self._data.get(name))
 
     async def refresh_loop(self) -> None:
         while True:

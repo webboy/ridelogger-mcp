@@ -67,6 +67,8 @@ def register(mcp: FastMCP) -> None:
             "Body matches VehicleStoreRequest in ridelogger-api. "
             "Road types 1–3: vehicle_type_id, vehicle_make_id, mileage, fuel_type_id, label, production_year; "
             "vehicle_model_id required for cars (type 1). "
+            "Resolve catalog IDs with `reference_data_get` (e.g. dataset=vehicle_makes, q=Claas; "
+            "dataset=fuel_types, q=diesel; dataset=vehicle_types, q=combine). Do not guess IDs. "
             + _AGRI_CREATE_HINT
             + " Optional: mileage_unit_id (defaults from owner country; use 3 for agri hours), "
             "steering_side_id (`GET /api/steering_sides`, defaults from owner country), "

@@ -34,7 +34,8 @@ VEHICLE_REFS_HINT = (
     "nested make/model objects when present, and vehicle_model_label for free-text agri models. "
     "vehicle_type_id 4=tractor, 5=combine, 6=trailer_attachment, 7=work_machine use primary meter hours "
     "when a meter exists; type 6 may have no primary meter on create. "
-    "Use these instead of cross-referencing IDs with ridelogger://reference/* resources."
+    "Use these instead of cross-referencing IDs. For ChatGPT, resolve IDs with tool "
+    "`reference_data_get` (MCP resources ridelogger://reference/* are not available to ChatGPT Apps)."
 )
 
 # Log mileage field mirrors the vehicle primary meter (km or engine hours).
